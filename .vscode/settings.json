@@ -1,6 +1,6 @@
 {
     "C_Cpp.default.configurationProvider": "particle.particle-vscode-core",
-    "particle.targetDevice": "Boron-Dev",
+    "particle.targetDevice": "MBTA-18xx",
     "particle.firmwareVersion": "1.5.1",
     "particle.targetPlatform": "boron",
     "cortex-debug.openocdPath": "${command:particle.getDebuggerOpenocdPath}"

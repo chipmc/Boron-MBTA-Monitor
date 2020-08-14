@@ -16,6 +16,7 @@
 
 //v1 -  Just seeing if I can talk to the temperature sensor and GPS sensor to work
 //v2 -  First demo release - works and sends data to Ubidots via Webhook 
+//v2.01 - Fix for doulbe send
 
 
 // Particle Product definitions
@@ -47,11 +48,11 @@ void dailyCleanup();
 int setDSTOffset(String command);
 int setSampleInterval(String command);
 bool isDSTusa();
-#line 16 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
+#line 17 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
 PRODUCT_ID(11743);                                  // Boron Connected Counter Header
 PRODUCT_VERSION(2);
 #define DSTRULES isDSTusa
-char currentPointRelease[5] ="2.00";
+char currentPointRelease[5] ="2.01";
 
 namespace FRAM {                                    // Moved to namespace instead of #define to limit scope
   enum Addresses {
@@ -282,8 +283,8 @@ void loop()
       fram.put(FRAM::currentCountsAddr,current);
       currentCountsWriteNeeded = false;
     }
-    if ((Time.minute() == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;           //  on hourly interval
     if ((Time.minute() % sysStatus.sampleIntervalMin == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;   // sub hourly interval
+    else if ((Time.minute() == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;           //  on hourly interval
     break;
 
   case SLEEPING_STATE: {                                              // This state is triggered once the park closes and runs until it opens
@@ -676,7 +677,7 @@ int setSampleInterval(String command) {                                      // 
   char * pEND;
   char data[256];
   int8_t tempSampleInterval = strtol(command,&pEND,10);                      // Looks for the first integer and interprets it
-  if ((tempSampleInterval < 0) | (tempSampleInterval > 60)) return 0;              // Make sure it falls in a valid range or send a "fail" result
+  if ((tempSampleInterval <= 0) | (tempSampleInterval > 60)) return 0;              // Make sure it falls in a valid range or send a "fail" result
   sysStatus.sampleIntervalMin = tempSampleInterval;
   systemStatusWriteNeeded = true;
   snprintf(data, sizeof(data), "Sample Interval is now %i minutes",sysStatus.sampleIntervalMin);

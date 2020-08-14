@@ -19,23 +19,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, DATA
   7 .module_info_crc 00000004  000de870  000de870  0001e870  2**0
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  8 .debug_info   001924d3  00000000  00000000  0001e874  2**0
+  8 .debug_info   001924d7  00000000  00000000  0001e874  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_abbrev 0001e18f  00000000  00000000  001b0d47  2**0
+  9 .debug_abbrev 0001e1a0  00000000  00000000  001b0d4b  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    00032f6d  00000000  00000000  001ceed6  2**0
+ 10 .debug_loc    00032f6d  00000000  00000000  001ceeeb  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_aranges 00003bf0  00000000  00000000  00201e43  2**0
+ 11 .debug_aranges 00003bf0  00000000  00000000  00201e58  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00007178  00000000  00000000  00205a33  2**0
+ 12 .debug_ranges 00007178  00000000  00000000  00205a48  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_macro  00047996  00000000  00000000  0020cbab  2**0
+ 13 .debug_macro  00047996  00000000  00000000  0020cbc0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_line   0004d409  00000000  00000000  00254541  2**0
+ 14 .debug_line   0004d408  00000000  00000000  00254556  2**0
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_str    00124052  00000000  00000000  002a194a  2**0
+ 15 .debug_str    00124052  00000000  00000000  002a195e  2**0
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_frame  00011750  00000000  00000000  003c599c  2**2
+ 16 .debug_frame  00011750  00000000  00000000  003c59b0  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -144,7 +144,7 @@ void module_user_setup() {
 void module_user_loop() {
    d408c:	b508      	push	{r3, lr}
     loop();
-   d408e:	f000 ff63 	bl	d4f58 <loop>
+   d408e:	f000 ff67 	bl	d4f60 <loop>
     _post_loop();
 }
    d4092:	e8bd 4008 	ldmia.w	sp!, {r3, lr}
@@ -1244,2234 +1244,2239 @@ int setSampleInterval(String command) {                                      // 
    d4586:	a903      	add	r1, sp, #12
    d4588:	6800      	ldr	r0, [r0, #0]
    d458a:	f007 fed1 	bl	dc330 <strtol>
-  if ((tempSampleInterval < 0) | (tempSampleInterval > 60)) return 0;              // Make sure it falls in a valid range or send a "fail" result
+  if ((tempSampleInterval <= 0) | (tempSampleInterval > 60)) return 0;              // Make sure it falls in a valid range or send a "fail" result
    d458e:	b2c3      	uxtb	r3, r0
-   d4590:	2b3c      	cmp	r3, #60	; 0x3c
-   d4592:	d818      	bhi.n	d45c6 <_Z17setSampleInterval6String+0x46>
+   d4590:	1e5a      	subs	r2, r3, #1
+   d4592:	2a3b      	cmp	r2, #59	; 0x3b
+   d4594:	d818      	bhi.n	d45c8 <_Z17setSampleInterval6String+0x48>
   sysStatus.sampleIntervalMin = tempSampleInterval;
-   d4594:	4a0e      	ldr	r2, [pc, #56]	; (d45d0 <_Z17setSampleInterval6String+0x50>)
-   d4596:	7193      	strb	r3, [r2, #6]
+   d4596:	4a0f      	ldr	r2, [pc, #60]	; (d45d4 <_Z17setSampleInterval6String+0x54>)
+   d4598:	7193      	strb	r3, [r2, #6]
   systemStatusWriteNeeded = true;
-   d4598:	4a0e      	ldr	r2, [pc, #56]	; (d45d4 <_Z17setSampleInterval6String+0x54>)
-   d459a:	2401      	movs	r4, #1
-   d459c:	7014      	strb	r4, [r2, #0]
+   d459a:	4a0f      	ldr	r2, [pc, #60]	; (d45d8 <_Z17setSampleInterval6String+0x58>)
+   d459c:	2401      	movs	r4, #1
+   d459e:	7014      	strb	r4, [r2, #0]
   snprintf(data, sizeof(data), "Sample Interval is now %i minutes",sysStatus.sampleIntervalMin);
-   d459e:	f44f 7180 	mov.w	r1, #256	; 0x100
-   d45a2:	4a0d      	ldr	r2, [pc, #52]	; (d45d8 <_Z17setSampleInterval6String+0x58>)
-   d45a4:	a804      	add	r0, sp, #16
-   d45a6:	f003 fec7 	bl	d8338 <snprintf>
-   d45aa:	f003 fe0d 	bl	d81c8 <spark_cloud_flag_connected>
+   d45a0:	f44f 7180 	mov.w	r1, #256	; 0x100
+   d45a4:	4a0d      	ldr	r2, [pc, #52]	; (d45dc <_Z17setSampleInterval6String+0x5c>)
+   d45a6:	a804      	add	r0, sp, #16
+   d45a8:	f003 fec6 	bl	d8338 <snprintf>
+   d45ac:	f003 fe0c 	bl	d81c8 <spark_cloud_flag_connected>
   if (Particle.connected()) {
-   d45ae:	b160      	cbz	r0, d45ca <_Z17setSampleInterval6String+0x4a>
-   d45b0:	4b0a      	ldr	r3, [pc, #40]	; (d45dc <_Z17setSampleInterval6String+0x5c>)
+   d45b0:	b160      	cbz	r0, d45cc <_Z17setSampleInterval6String+0x4c>
+   d45b2:	4b0b      	ldr	r3, [pc, #44]	; (d45e0 <_Z17setSampleInterval6String+0x60>)
     publishQueue.publish("Interval", data, PRIVATE);
-   d45b2:	490b      	ldr	r1, [pc, #44]	; (d45e0 <_Z17setSampleInterval6String+0x60>)
-   d45b4:	781b      	ldrb	r3, [r3, #0]
-   d45b6:	480b      	ldr	r0, [pc, #44]	; (d45e4 <_Z17setSampleInterval6String+0x64>)
+   d45b4:	490b      	ldr	r1, [pc, #44]	; (d45e4 <_Z17setSampleInterval6String+0x64>)
+   d45b6:	781b      	ldrb	r3, [r3, #0]
+   d45b8:	480b      	ldr	r0, [pc, #44]	; (d45e8 <_Z17setSampleInterval6String+0x68>)
 }
 
 // particle::Flags<TagT, ValueT>
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags() :
         val_(0) {
-   d45b8:	2200      	movs	r2, #0
-   d45ba:	f88d 2000 	strb.w	r2, [sp]
-   d45be:	aa04      	add	r2, sp, #16
-   d45c0:	f7ff fe8c 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
-   d45c4:	e001      	b.n	d45ca <_Z17setSampleInterval6String+0x4a>
+   d45ba:	2200      	movs	r2, #0
+   d45bc:	f88d 2000 	strb.w	r2, [sp]
+   d45c0:	aa04      	add	r2, sp, #16
+   d45c2:	f7ff fe8b 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
+   d45c6:	e001      	b.n	d45cc <_Z17setSampleInterval6String+0x4c>
 
 int setSampleInterval(String command) {                                      // This is the number of hours that will be added for Daylight Savings Time 0 (off) - 2
   char * pEND;
   char data[256];
   int8_t tempSampleInterval = strtol(command,&pEND,10);                      // Looks for the first integer and interprets it
-  if ((tempSampleInterval < 0) | (tempSampleInterval > 60)) return 0;              // Make sure it falls in a valid range or send a "fail" result
-   d45c6:	2000      	movs	r0, #0
-   d45c8:	e000      	b.n	d45cc <_Z17setSampleInterval6String+0x4c>
+  if ((tempSampleInterval <= 0) | (tempSampleInterval > 60)) return 0;              // Make sure it falls in a valid range or send a "fail" result
+   d45c8:	2000      	movs	r0, #0
+   d45ca:	e000      	b.n	d45ce <_Z17setSampleInterval6String+0x4e>
   systemStatusWriteNeeded = true;
   snprintf(data, sizeof(data), "Sample Interval is now %i minutes",sysStatus.sampleIntervalMin);
   if (Particle.connected()) {
     publishQueue.publish("Interval", data, PRIVATE);
   }
   return 1;
-   d45ca:	4620      	mov	r0, r4
+   d45cc:	4620      	mov	r0, r4
 }
-   d45cc:	b044      	add	sp, #272	; 0x110
-   d45ce:	bd10      	pop	{r4, pc}
-   d45d0:	2003e04c 	.word	0x2003e04c
-   d45d4:	2003df58 	.word	0x2003df58
-   d45d8:	000dcae7 	.word	0x000dcae7
-   d45dc:	2003df0c 	.word	0x2003df0c
-   d45e0:	000dcd32 	.word	0x000dcd32
-   d45e4:	2003deac 	.word	0x2003deac
+   d45ce:	b044      	add	sp, #272	; 0x110
+   d45d0:	bd10      	pop	{r4, pc}
+   d45d2:	bf00      	nop
+   d45d4:	2003e04c 	.word	0x2003e04c
+   d45d8:	2003df58 	.word	0x2003df58
+   d45dc:	000dcae7 	.word	0x000dcae7
+   d45e0:	2003df0c 	.word	0x2003df0c
+   d45e4:	000dcd32 	.word	0x000dcd32
+   d45e8:	2003deac 	.word	0x2003deac
 
-000d45e8 <_Z9sendEventv>:
+000d45ec <_Z9sendEventv>:
   //sensorDetect = steadyCountTest();                                     // Comment out to cause the device to run through a series of tests
   
 }
 
 
 void sendEvent() {
-   d45e8:	e92d 4ff0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
+   d45ec:	e92d 4ff0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
   char data[256];                                                     // Store the date in this character array - not global
   snprintf(data, sizeof(data), "{\"cabinT\":%4.2f, \"ventT\":%4.2f, \"outsideT\":%4.2f, \"battery\":%i,  \"key1\":\"%s\", \"resets\":%i, \"alerts\":%i, \"timestamp\":%lu000, \"lat\":%f, \"lng\":%f}",current.tempArray[0], current.tempArray[1], current.tempArray[2],sysStatus.stateOfCharge, batteryContextStr, sysStatus.resetCount, current.alertCount, Time.now(), current.latitude, current.longitude);
-   d45ec:	4b23      	ldr	r3, [pc, #140]	; (d467c <_Z9sendEventv+0x94>)
-   d45ee:	4c24      	ldr	r4, [pc, #144]	; (d4680 <_Z9sendEventv+0x98>)
-   d45f0:	689d      	ldr	r5, [r3, #8]
-   d45f2:	69a2      	ldr	r2, [r4, #24]
-   d45f4:	691b      	ldr	r3, [r3, #16]
+   d45f0:	4b23      	ldr	r3, [pc, #140]	; (d4680 <_Z9sendEventv+0x94>)
+   d45f2:	4c24      	ldr	r4, [pc, #144]	; (d4684 <_Z9sendEventv+0x98>)
+   d45f4:	689d      	ldr	r5, [r3, #8]
+   d45f6:	69a2      	ldr	r2, [r4, #24]
+   d45f8:	691b      	ldr	r3, [r3, #16]
   //sensorDetect = steadyCountTest();                                     // Comment out to cause the device to run through a series of tests
   
 }
 
 
 void sendEvent() {
-   d45f6:	b0d3      	sub	sp, #332	; 0x14c
+   d45fa:	b0d3      	sub	sp, #332	; 0x14c
   char data[256];                                                     // Store the date in this character array - not global
   snprintf(data, sizeof(data), "{\"cabinT\":%4.2f, \"ventT\":%4.2f, \"outsideT\":%4.2f, \"battery\":%i,  \"key1\":\"%s\", \"resets\":%i, \"alerts\":%i, \"timestamp\":%lu000, \"lat\":%f, \"lng\":%f}",current.tempArray[0], current.tempArray[1], current.tempArray[2],sysStatus.stateOfCharge, batteryContextStr, sysStatus.resetCount, current.alertCount, Time.now(), current.latitude, current.longitude);
-   d45f8:	e9d4 6700 	ldrd	r6, r7, [r4]
-   d45fc:	e9d4 8902 	ldrd	r8, r9, [r4, #8]
-   d4600:	e9d4 ab04 	ldrd	sl, fp, [r4, #16]
-   d4604:	9311      	str	r3, [sp, #68]	; 0x44
-   d4606:	9210      	str	r2, [sp, #64]	; 0x40
-   d4608:	f005 faf1 	bl	d9bee <_ZN9TimeClass3nowEv>
-   d460c:	ed94 7b0a 	vldr	d7, [r4, #40]	; 0x28
-   d4610:	ed8d 7b0e 	vstr	d7, [sp, #56]	; 0x38
-   d4614:	ed94 7b08 	vldr	d7, [r4, #32]
-   d4618:	9b11      	ldr	r3, [sp, #68]	; 0x44
-   d461a:	9a10      	ldr	r2, [sp, #64]	; 0x40
-   d461c:	9308      	str	r3, [sp, #32]
-   d461e:	4b19      	ldr	r3, [pc, #100]	; (d4684 <_Z9sendEventv+0x9c>)
-   d4620:	900a      	str	r0, [sp, #40]	; 0x28
-   d4622:	ed8d 7b0c 	vstr	d7, [sp, #48]	; 0x30
-   d4626:	9209      	str	r2, [sp, #36]	; 0x24
-   d4628:	9307      	str	r3, [sp, #28]
-   d462a:	9506      	str	r5, [sp, #24]
-   d462c:	e9cd ab04 	strd	sl, fp, [sp, #16]
-   d4630:	e9cd 8902 	strd	r8, r9, [sp, #8]
-   d4634:	e9cd 6700 	strd	r6, r7, [sp]
-   d4638:	4a13      	ldr	r2, [pc, #76]	; (d4688 <_Z9sendEventv+0xa0>)
-   d463a:	f44f 7180 	mov.w	r1, #256	; 0x100
-   d463e:	a812      	add	r0, sp, #72	; 0x48
-   d4640:	f003 fe7a 	bl	d8338 <snprintf>
-   d4644:	4b11      	ldr	r3, [pc, #68]	; (d468c <_Z9sendEventv+0xa4>)
+   d45fc:	e9d4 6700 	ldrd	r6, r7, [r4]
+   d4600:	e9d4 8902 	ldrd	r8, r9, [r4, #8]
+   d4604:	e9d4 ab04 	ldrd	sl, fp, [r4, #16]
+   d4608:	9311      	str	r3, [sp, #68]	; 0x44
+   d460a:	9210      	str	r2, [sp, #64]	; 0x40
+   d460c:	f005 faef 	bl	d9bee <_ZN9TimeClass3nowEv>
+   d4610:	ed94 7b0a 	vldr	d7, [r4, #40]	; 0x28
+   d4614:	ed8d 7b0e 	vstr	d7, [sp, #56]	; 0x38
+   d4618:	ed94 7b08 	vldr	d7, [r4, #32]
+   d461c:	9b11      	ldr	r3, [sp, #68]	; 0x44
+   d461e:	9a10      	ldr	r2, [sp, #64]	; 0x40
+   d4620:	9308      	str	r3, [sp, #32]
+   d4622:	4b19      	ldr	r3, [pc, #100]	; (d4688 <_Z9sendEventv+0x9c>)
+   d4624:	900a      	str	r0, [sp, #40]	; 0x28
+   d4626:	ed8d 7b0c 	vstr	d7, [sp, #48]	; 0x30
+   d462a:	9209      	str	r2, [sp, #36]	; 0x24
+   d462c:	9307      	str	r3, [sp, #28]
+   d462e:	9506      	str	r5, [sp, #24]
+   d4630:	e9cd ab04 	strd	sl, fp, [sp, #16]
+   d4634:	e9cd 8902 	strd	r8, r9, [sp, #8]
+   d4638:	e9cd 6700 	strd	r6, r7, [sp]
+   d463c:	4a13      	ldr	r2, [pc, #76]	; (d468c <_Z9sendEventv+0xa0>)
+   d463e:	f44f 7180 	mov.w	r1, #256	; 0x100
+   d4642:	a812      	add	r0, sp, #72	; 0x48
+   d4644:	f003 fe78 	bl	d8338 <snprintf>
+   d4648:	4b11      	ldr	r3, [pc, #68]	; (d4690 <_Z9sendEventv+0xa4>)
   publishQueue.publish("Ubidots-MBTA-Hook-v1", data, PRIVATE);
-   d4646:	4912      	ldr	r1, [pc, #72]	; (d4690 <_Z9sendEventv+0xa8>)
+   d464a:	4912      	ldr	r1, [pc, #72]	; (d4694 <_Z9sendEventv+0xa8>)
 }
 
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags(Flag<TagT, ValueT> flag) :
         val_(flag.value()) {
-   d4648:	781b      	ldrb	r3, [r3, #0]
-   d464a:	4812      	ldr	r0, [pc, #72]	; (d4694 <_Z9sendEventv+0xac>)
-   d464c:	2200      	movs	r2, #0
-   d464e:	f88d 2000 	strb.w	r2, [sp]
-   d4652:	aa12      	add	r2, sp, #72	; 0x48
-   d4654:	f7ff fe42 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
+   d464c:	781b      	ldrb	r3, [r3, #0]
+   d464e:	4812      	ldr	r0, [pc, #72]	; (d4698 <_Z9sendEventv+0xac>)
+   d4650:	2200      	movs	r2, #0
+   d4652:	f88d 2000 	strb.w	r2, [sp]
+   d4656:	aa12      	add	r2, sp, #72	; 0x48
+   d4658:	f7ff fe40 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
   dataInFlight = true;                                                // set the data inflight flag
-   d4658:	4b0f      	ldr	r3, [pc, #60]	; (d4698 <_Z9sendEventv+0xb0>)
-   d465a:	2201      	movs	r2, #1
-   d465c:	701a      	strb	r2, [r3, #0]
+   d465c:	4b0f      	ldr	r3, [pc, #60]	; (d469c <_Z9sendEventv+0xb0>)
+   d465e:	2201      	movs	r2, #1
+   d4660:	701a      	strb	r2, [r3, #0]
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 inline system_tick_t millis(void) { return HAL_Timer_Get_Milli_Seconds(); }
-   d465e:	f003 fb53 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d4662:	f003 fb51 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
   webhookTimeStamp = millis();
-   d4662:	4b0e      	ldr	r3, [pc, #56]	; (d469c <_Z9sendEventv+0xb4>)
-   d4664:	6018      	str	r0, [r3, #0]
+   d4666:	4b0e      	ldr	r3, [pc, #56]	; (d46a0 <_Z9sendEventv+0xb4>)
+   d4668:	6018      	str	r0, [r3, #0]
   currentHourlyPeriod = Time.hour();
-   d4666:	f005 fac9 	bl	d9bfc <_ZN9TimeClass4hourEv>
-   d466a:	4b0d      	ldr	r3, [pc, #52]	; (d46a0 <_Z9sendEventv+0xb8>)
-   d466c:	6018      	str	r0, [r3, #0]
+   d466a:	f005 fac7 	bl	d9bfc <_ZN9TimeClass4hourEv>
+   d466e:	4b0d      	ldr	r3, [pc, #52]	; (d46a4 <_Z9sendEventv+0xb8>)
+   d4670:	6018      	str	r0, [r3, #0]
   currentMinutePeriod = Time.minute();
-   d466e:	f005 facf 	bl	d9c10 <_ZN9TimeClass6minuteEv>
-   d4672:	4b0c      	ldr	r3, [pc, #48]	; (d46a4 <_Z9sendEventv+0xbc>)
-   d4674:	6018      	str	r0, [r3, #0]
+   d4672:	f005 facd 	bl	d9c10 <_ZN9TimeClass6minuteEv>
+   d4676:	4b0c      	ldr	r3, [pc, #48]	; (d46a8 <_Z9sendEventv+0xbc>)
+   d4678:	6018      	str	r0, [r3, #0]
 }
-   d4676:	b053      	add	sp, #332	; 0x14c
-   d4678:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
-   d467c:	2003e04c 	.word	0x2003e04c
-   d4680:	2003dfe8 	.word	0x2003dfe8
-   d4684:	2003df41 	.word	0x2003df41
-   d4688:	000dcb09 	.word	0x000dcb09
-   d468c:	2003df0c 	.word	0x2003df0c
-   d4690:	000dcb99 	.word	0x000dcb99
-   d4694:	2003deac 	.word	0x2003deac
-   d4698:	2003e028 	.word	0x2003e028
-   d469c:	2003df54 	.word	0x2003df54
-   d46a0:	2003df60 	.word	0x2003df60
-   d46a4:	2003dfe4 	.word	0x2003dfe4
+   d467a:	b053      	add	sp, #332	; 0x14c
+   d467c:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
+   d4680:	2003e04c 	.word	0x2003e04c
+   d4684:	2003dfe8 	.word	0x2003dfe8
+   d4688:	2003df41 	.word	0x2003df41
+   d468c:	000dcb09 	.word	0x000dcb09
+   d4690:	2003df0c 	.word	0x2003df0c
+   d4694:	000dcb99 	.word	0x000dcb99
+   d4698:	2003deac 	.word	0x2003deac
+   d469c:	2003e028 	.word	0x2003e028
+   d46a0:	2003df54 	.word	0x2003df54
+   d46a4:	2003df60 	.word	0x2003df60
+   d46a8:	2003dfe4 	.word	0x2003dfe4
+   d46ac:	00000000 	.word	0x00000000
 
-000d46a8 <_Z7getTempPh>:
+000d46b0 <_Z7getTempPh>:
   sysStatus.stateOfCharge = int(System.batteryCharge());             // Percentage of full charge
   systemStatusWriteNeeded=true;
   currentCountsWriteNeeded=true;
 }
 
 double getTemp(uint8_t addr[8]) {
-   d46a8:	b530      	push	{r4, r5, lr}
-   d46aa:	ed2d 8b02 	vpush	{d8}
-   d46ae:	4605      	mov	r5, r0
-   d46b0:	b083      	sub	sp, #12
+   d46b0:	b530      	push	{r4, r5, lr}
+   d46b2:	ed2d 8b02 	vpush	{d8}
+   d46b6:	4605      	mov	r5, r0
+   d46b8:	b083      	sub	sp, #12
   double _temp;
   int   i = 0;
-   d46b2:	2400      	movs	r4, #0
+   d46ba:	2400      	movs	r4, #0
 
   do {
     _temp = ds18b20.getTemperature(addr);
-   d46b4:	2200      	movs	r2, #0
-   d46b6:	4629      	mov	r1, r5
-   d46b8:	4819      	ldr	r0, [pc, #100]	; (d4720 <_Z7getTempPh+0x78>)
-   d46ba:	f001 f8e3 	bl	d5884 <_ZN7DS18B2014getTemperatureEPhb>
+   d46bc:	2200      	movs	r2, #0
+   d46be:	4629      	mov	r1, r5
+   d46c0:	4819      	ldr	r0, [pc, #100]	; (d4728 <_Z7getTempPh+0x78>)
+   d46c2:	f001 f8df 	bl	d5884 <_ZN7DS18B2014getTemperatureEPhb>
   } while (!ds18b20.crcCheck() && MAXRETRY > i++);
-   d46be:	4818      	ldr	r0, [pc, #96]	; (d4720 <_Z7getTempPh+0x78>)
+   d46c6:	4818      	ldr	r0, [pc, #96]	; (d4728 <_Z7getTempPh+0x78>)
 double getTemp(uint8_t addr[8]) {
   double _temp;
   int   i = 0;
 
   do {
     _temp = ds18b20.getTemperature(addr);
-   d46c0:	ed8d 0a01 	vstr	s0, [sp, #4]
+   d46c8:	ed8d 0a01 	vstr	s0, [sp, #4]
   } while (!ds18b20.crcCheck() && MAXRETRY > i++);
-   d46c4:	f001 f99c 	bl	d5a00 <_ZN7DS18B208crcCheckEv>
-   d46c8:	ed9d 0a01 	vldr	s0, [sp, #4]
-   d46cc:	b950      	cbnz	r0, d46e4 <_Z7getTempPh+0x3c>
-   d46ce:	3401      	adds	r4, #1
-   d46d0:	2c04      	cmp	r4, #4
-   d46d2:	d1ef      	bne.n	d46b4 <_Z7getTempPh+0xc>
+   d46cc:	f001 f998 	bl	d5a00 <_ZN7DS18B208crcCheckEv>
+   d46d0:	ed9d 0a01 	vldr	s0, [sp, #4]
+   d46d4:	b950      	cbnz	r0, d46ec <_Z7getTempPh+0x3c>
+   d46d6:	3401      	adds	r4, #1
+   d46d8:	2c04      	cmp	r4, #4
+   d46da:	d1ef      	bne.n	d46bc <_Z7getTempPh+0xc>
     //_temp = ds18b20.convertToFahrenheit(_temp);
     Serial.println(_temp);
   }
   else {
     _temp = NAN;
     Serial.println("Invalid reading");
-   d46d4:	f005 fbb6 	bl	d9e44 <_Z16_fetch_usbserialv>
-   d46d8:	4912      	ldr	r1, [pc, #72]	; (d4724 <_Z7getTempPh+0x7c>)
-   d46da:	f004 fde4 	bl	d92a6 <_ZN5Print7printlnEPKc>
-   d46de:	ed9f 8b0e 	vldr	d8, [pc, #56]	; d4718 <_Z7getTempPh+0x70>
+   d46dc:	f005 fbb2 	bl	d9e44 <_Z16_fetch_usbserialv>
+   d46e0:	4912      	ldr	r1, [pc, #72]	; (d472c <_Z7getTempPh+0x7c>)
+   d46e2:	f004 fde0 	bl	d92a6 <_ZN5Print7printlnEPKc>
+   d46e6:	ed9f 8b0e 	vldr	d8, [pc, #56]	; d4720 <_Z7getTempPh+0x70>
   }
 
   return _temp;
-   d46e2:	e010      	b.n	d4706 <_Z7getTempPh+0x5e>
+   d46ea:	e010      	b.n	d470e <_Z7getTempPh+0x5e>
 
   do {
     _temp = ds18b20.getTemperature(addr);
   } while (!ds18b20.crcCheck() && MAXRETRY > i++);
 
   if (i < MAXRETRY) {
-   d46e4:	2c03      	cmp	r4, #3
-   d46e6:	d0f5      	beq.n	d46d4 <_Z7getTempPh+0x2c>
+   d46ec:	2c03      	cmp	r4, #3
+   d46ee:	d0f5      	beq.n	d46dc <_Z7getTempPh+0x2c>
 double getTemp(uint8_t addr[8]) {
   double _temp;
   int   i = 0;
 
   do {
     _temp = ds18b20.getTemperature(addr);
-   d46e8:	ee10 0a10 	vmov	r0, s0
-   d46ec:	f005 fff4 	bl	da6d8 <__aeabi_f2d>
-   d46f0:	ec41 0b18 	vmov	d8, r0, r1
+   d46f0:	ee10 0a10 	vmov	r0, s0
+   d46f4:	f005 fff0 	bl	da6d8 <__aeabi_f2d>
+   d46f8:	ec41 0b18 	vmov	d8, r0, r1
   } while (!ds18b20.crcCheck() && MAXRETRY > i++);
 
   if (i < MAXRETRY) {
     //_temp = ds18b20.convertToFahrenheit(_temp);
     Serial.println(_temp);
-   d46f4:	f005 fba6 	bl	d9e44 <_Z16_fetch_usbserialv>
-   d46f8:	eeb0 0a48 	vmov.f32	s0, s16
-   d46fc:	eef0 0a68 	vmov.f32	s1, s17
-   d4700:	2102      	movs	r1, #2
-   d4702:	f004 feb9 	bl	d9478 <_ZN5Print7printlnEdi>
+   d46fc:	f005 fba2 	bl	d9e44 <_Z16_fetch_usbserialv>
+   d4700:	eeb0 0a48 	vmov.f32	s0, s16
+   d4704:	eef0 0a68 	vmov.f32	s1, s17
+   d4708:	2102      	movs	r1, #2
+   d470a:	f004 feb5 	bl	d9478 <_ZN5Print7printlnEdi>
     _temp = NAN;
     Serial.println("Invalid reading");
   }
 
   return _temp;
 }
-   d4706:	eeb0 0a48 	vmov.f32	s0, s16
-   d470a:	eef0 0a68 	vmov.f32	s1, s17
-   d470e:	b003      	add	sp, #12
-   d4710:	ecbd 8b02 	vpop	{d8}
-   d4714:	bd30      	pop	{r4, r5, pc}
-   d4716:	bf00      	nop
-   d4718:	00000000 	.word	0x00000000
-   d471c:	7ff80000 	.word	0x7ff80000
-   d4720:	2003e02c 	.word	0x2003e02c
-   d4724:	000dcbae 	.word	0x000dcbae
+   d470e:	eeb0 0a48 	vmov.f32	s0, s16
+   d4712:	eef0 0a68 	vmov.f32	s1, s17
+   d4716:	b003      	add	sp, #12
+   d4718:	ecbd 8b02 	vpop	{d8}
+   d471c:	bd30      	pop	{r4, r5, pc}
+   d471e:	bf00      	nop
+   d4720:	00000000 	.word	0x00000000
+   d4724:	7ff80000 	.word	0x7ff80000
+   d4728:	2003e02c 	.word	0x2003e02c
+   d472c:	000dcbae 	.word	0x000dcbae
 
-000d4728 <_Z17getSignalStrengthv>:
+000d4730 <_Z17getSignalStrengthv>:
 
 void getSignalStrength() {
-   d4728:	b530      	push	{r4, r5, lr}
+   d4730:	b530      	push	{r4, r5, lr}
   const char* radioTech[10] = {"Unknown","None","WiFi","GSM","UMTS","CDMA","LTE","IEEE802154","LTE_CAT_M1","LTE_CAT_NB1"};
-   d472a:	4d19      	ldr	r5, [pc, #100]	; (d4790 <_Z17getSignalStrengthv+0x68>)
-   d472c:	cd0f      	ldmia	r5!, {r0, r1, r2, r3}
+   d4732:	4d19      	ldr	r5, [pc, #100]	; (d4798 <_Z17getSignalStrengthv+0x68>)
+   d4734:	cd0f      	ldmia	r5!, {r0, r1, r2, r3}
   }
 
   return _temp;
 }
 
 void getSignalStrength() {
-   d472e:	b099      	sub	sp, #100	; 0x64
+   d4736:	b099      	sub	sp, #100	; 0x64
   const char* radioTech[10] = {"Unknown","None","WiFi","GSM","UMTS","CDMA","LTE","IEEE802154","LTE_CAT_M1","LTE_CAT_NB1"};
-   d4730:	ac04      	add	r4, sp, #16
-   d4732:	c40f      	stmia	r4!, {r0, r1, r2, r3}
-   d4734:	cd0f      	ldmia	r5!, {r0, r1, r2, r3}
-   d4736:	c40f      	stmia	r4!, {r0, r1, r2, r3}
-   d4738:	e895 0003 	ldmia.w	r5, {r0, r1}
-   d473c:	e884 0003 	stmia.w	r4, {r0, r1}
+   d4738:	ac04      	add	r4, sp, #16
+   d473a:	c40f      	stmia	r4!, {r0, r1, r2, r3}
+   d473c:	cd0f      	ldmia	r5!, {r0, r1, r2, r3}
+   d473e:	c40f      	stmia	r4!, {r0, r1, r2, r3}
+   d4740:	e895 0003 	ldmia.w	r5, {r0, r1}
+   d4744:	e884 0003 	stmia.w	r4, {r0, r1}
   // New Signal Strength capability - https://community.particle.io/t/boron-lte-and-cellular-rssi-funny-values/45299/8
   CellularSignal sig = Cellular.RSSI();
-   d4740:	4914      	ldr	r1, [pc, #80]	; (d4794 <_Z17getSignalStrengthv+0x6c>)
-   d4742:	a80e      	add	r0, sp, #56	; 0x38
-   d4744:	f003 feaa 	bl	d849c <_ZN5spark13CellularClass4RSSIEv>
+   d4748:	4914      	ldr	r1, [pc, #80]	; (d479c <_Z17getSignalStrengthv+0x6c>)
+   d474a:	a80e      	add	r0, sp, #56	; 0x38
+   d474c:	f003 fea6 	bl	d849c <_ZN5spark13CellularClass4RSSIEv>
 
   auto rat = sig.getAccessTechnology();
-   d4748:	a80e      	add	r0, sp, #56	; 0x38
-   d474a:	f003 fefa 	bl	d8542 <_ZNK14CellularSignal19getAccessTechnologyEv>
-   d474e:	4604      	mov	r4, r0
+   d4750:	a80e      	add	r0, sp, #56	; 0x38
+   d4752:	f003 fef6 	bl	d8542 <_ZNK14CellularSignal19getAccessTechnologyEv>
+   d4756:	4604      	mov	r4, r0
 
   //float strengthVal = sig.getStrengthValue();
   float strengthPercentage = sig.getStrength();
-   d4750:	a80e      	add	r0, sp, #56	; 0x38
-   d4752:	f003 ff47 	bl	d85e4 <_ZNK14CellularSignal11getStrengthEv>
+   d4758:	a80e      	add	r0, sp, #56	; 0x38
+   d475a:	f003 ff43 	bl	d85e4 <_ZNK14CellularSignal11getStrengthEv>
 
   //float qualityVal = sig.getQualityValue();
   float qualityPercentage = sig.getQuality();
-   d4756:	a80e      	add	r0, sp, #56	; 0x38
+   d475e:	a80e      	add	r0, sp, #56	; 0x38
   CellularSignal sig = Cellular.RSSI();
 
   auto rat = sig.getAccessTechnology();
 
   //float strengthVal = sig.getStrengthValue();
   float strengthPercentage = sig.getStrength();
-   d4758:	ee10 5a10 	vmov	r5, s0
+   d4760:	ee10 5a10 	vmov	r5, s0
 
   //float qualityVal = sig.getQualityValue();
   float qualityPercentage = sig.getQuality();
-   d475c:	f003 ff28 	bl	d85b0 <_ZNK14CellularSignal10getQualityEv>
+   d4764:	f003 ff24 	bl	d85b0 <_ZNK14CellularSignal10getQualityEv>
 
   snprintf(SignalString,sizeof(SignalString), "%s S:%2.0f%%, Q:%2.0f%% ", radioTech[rat], strengthPercentage, qualityPercentage);
-   d4760:	ab18      	add	r3, sp, #96	; 0x60
-   d4762:	ee10 0a10 	vmov	r0, s0
-   d4766:	eb03 0484 	add.w	r4, r3, r4, lsl #2
-   d476a:	f005 ffb5 	bl	da6d8 <__aeabi_f2d>
-   d476e:	e9cd 0102 	strd	r0, r1, [sp, #8]
-   d4772:	4628      	mov	r0, r5
-   d4774:	f005 ffb0 	bl	da6d8 <__aeabi_f2d>
-   d4778:	e9cd 0100 	strd	r0, r1, [sp]
-   d477c:	4a06      	ldr	r2, [pc, #24]	; (d4798 <_Z17getSignalStrengthv+0x70>)
-   d477e:	f854 3c50 	ldr.w	r3, [r4, #-80]
-   d4782:	4806      	ldr	r0, [pc, #24]	; (d479c <_Z17getSignalStrengthv+0x74>)
-   d4784:	2140      	movs	r1, #64	; 0x40
-   d4786:	f003 fdd7 	bl	d8338 <snprintf>
+   d4768:	ab18      	add	r3, sp, #96	; 0x60
+   d476a:	ee10 0a10 	vmov	r0, s0
+   d476e:	eb03 0484 	add.w	r4, r3, r4, lsl #2
+   d4772:	f005 ffb1 	bl	da6d8 <__aeabi_f2d>
+   d4776:	e9cd 0102 	strd	r0, r1, [sp, #8]
+   d477a:	4628      	mov	r0, r5
+   d477c:	f005 ffac 	bl	da6d8 <__aeabi_f2d>
+   d4780:	e9cd 0100 	strd	r0, r1, [sp]
+   d4784:	4a06      	ldr	r2, [pc, #24]	; (d47a0 <_Z17getSignalStrengthv+0x70>)
+   d4786:	f854 3c50 	ldr.w	r3, [r4, #-80]
+   d478a:	4806      	ldr	r0, [pc, #24]	; (d47a4 <_Z17getSignalStrengthv+0x74>)
+   d478c:	2140      	movs	r1, #64	; 0x40
+   d478e:	f003 fdd3 	bl	d8338 <snprintf>
 }
-   d478a:	b019      	add	sp, #100	; 0x64
-   d478c:	bd30      	pop	{r4, r5, pc}
-   d478e:	bf00      	nop
-   d4790:	000dc9f8 	.word	0x000dc9f8
-   d4794:	2003e25c 	.word	0x2003e25c
-   d4798:	000dcbbe 	.word	0x000dcbbe
-   d479c:	2003df98 	.word	0x2003df98
+   d4792:	b019      	add	sp, #100	; 0x64
+   d4794:	bd30      	pop	{r4, r5, pc}
+   d4796:	bf00      	nop
+   d4798:	000dc9f8 	.word	0x000dc9f8
+   d479c:	2003e25c 	.word	0x2003e25c
+   d47a0:	000dcbbe 	.word	0x000dcbbe
+   d47a4:	2003df98 	.word	0x2003df98
 
-000d47a0 <_Z11petWatchdogv>:
+000d47a8 <_Z11petWatchdogv>:
 {
   watchdogFlag = true;
 }
 
 void petWatchdog()
 {
-   d47a0:	b537      	push	{r0, r1, r2, r4, r5, lr}
+   d47a8:	b537      	push	{r0, r1, r2, r4, r5, lr}
 
 static Hal_Pin_Info* PIN_MAP = HAL_Pin_Map();
 
 inline void pinSetFast(pin_t _pin)
 {
     uint32_t nrf_pin = NRF_GPIO_PIN_MAP(PIN_MAP[_pin].gpio_port, PIN_MAP[_pin].gpio_pin);
-   d47a2:	4d16      	ldr	r5, [pc, #88]	; (d47fc <_Z11petWatchdogv+0x5c>)
-   d47a4:	682a      	ldr	r2, [r5, #0]
-   d47a6:	f892 3051 	ldrb.w	r3, [r2, #81]	; 0x51
-   d47aa:	f892 1050 	ldrb.w	r1, [r2, #80]	; 0x50
-   d47ae:	a802      	add	r0, sp, #8
-   d47b0:	f003 031f 	and.w	r3, r3, #31
-   d47b4:	ea43 1341 	orr.w	r3, r3, r1, lsl #5
-   d47b8:	f840 3d08 	str.w	r3, [r0, #-8]!
+   d47aa:	4d16      	ldr	r5, [pc, #88]	; (d4804 <_Z11petWatchdogv+0x5c>)
+   d47ac:	682a      	ldr	r2, [r5, #0]
+   d47ae:	f892 3051 	ldrb.w	r3, [r2, #81]	; 0x51
+   d47b2:	f892 1050 	ldrb.w	r1, [r2, #80]	; 0x50
+   d47b6:	a802      	add	r0, sp, #8
+   d47b8:	f003 031f 	and.w	r3, r3, #31
+   d47bc:	ea43 1341 	orr.w	r3, r3, r1, lsl #5
+   d47c0:	f840 3d08 	str.w	r3, [r0, #-8]!
 }
 
 
 __STATIC_INLINE void nrf_gpio_pin_set(uint32_t pin_number)
 {
     NRF_GPIO_Type * reg = nrf_gpio_pin_port_decode(&pin_number);
-   d47bc:	f7ff fc8c 	bl	d40d8 <nrf_gpio_pin_port_decode>
+   d47c4:	f7ff fc88 	bl	d40d8 <nrf_gpio_pin_port_decode>
 
     nrf_gpio_port_out_set(reg, 1UL << pin_number);
-   d47c0:	9b00      	ldr	r3, [sp, #0]
+   d47c8:	9b00      	ldr	r3, [sp, #0]
     nrf_gpio_pin_set(nrf_pin);
 }
 
 inline void pinResetFast(pin_t _pin)
 {
     uint32_t nrf_pin = NRF_GPIO_PIN_MAP(PIN_MAP[_pin].gpio_port, PIN_MAP[_pin].gpio_pin);
-   d47c2:	682a      	ldr	r2, [r5, #0]
-   d47c4:	2401      	movs	r4, #1
-   d47c6:	fa04 f303 	lsl.w	r3, r4, r3
+   d47ca:	682a      	ldr	r2, [r5, #0]
+   d47cc:	2401      	movs	r4, #1
+   d47ce:	fa04 f303 	lsl.w	r3, r4, r3
 }
 
 
 __STATIC_INLINE void nrf_gpio_port_out_set(NRF_GPIO_Type * p_reg, uint32_t set_mask)
 {
     p_reg->OUTSET = set_mask;
-   d47ca:	f8c0 3508 	str.w	r3, [r0, #1288]	; 0x508
-   d47ce:	f892 3051 	ldrb.w	r3, [r2, #81]	; 0x51
-   d47d2:	f892 1050 	ldrb.w	r1, [r2, #80]	; 0x50
-   d47d6:	a802      	add	r0, sp, #8
-   d47d8:	f003 031f 	and.w	r3, r3, #31
-   d47dc:	ea43 1341 	orr.w	r3, r3, r1, lsl #5
-   d47e0:	f840 3d04 	str.w	r3, [r0, #-4]!
+   d47d2:	f8c0 3508 	str.w	r3, [r0, #1288]	; 0x508
+   d47d6:	f892 3051 	ldrb.w	r3, [r2, #81]	; 0x51
+   d47da:	f892 1050 	ldrb.w	r1, [r2, #80]	; 0x50
+   d47de:	a802      	add	r0, sp, #8
+   d47e0:	f003 031f 	and.w	r3, r3, #31
+   d47e4:	ea43 1341 	orr.w	r3, r3, r1, lsl #5
+   d47e8:	f840 3d04 	str.w	r3, [r0, #-4]!
 }
 
 
 __STATIC_INLINE void nrf_gpio_pin_clear(uint32_t pin_number)
 {
     NRF_GPIO_Type * reg = nrf_gpio_pin_port_decode(&pin_number);
-   d47e4:	f7ff fc78 	bl	d40d8 <nrf_gpio_pin_port_decode>
+   d47ec:	f7ff fc74 	bl	d40d8 <nrf_gpio_pin_port_decode>
 
     nrf_gpio_port_out_clear(reg, 1UL << pin_number);
-   d47e8:	9b01      	ldr	r3, [sp, #4]
-   d47ea:	409c      	lsls	r4, r3
+   d47f0:	9b01      	ldr	r3, [sp, #4]
+   d47f2:	409c      	lsls	r4, r3
   digitalWriteFast(donePin, HIGH);                                        // Pet the watchdog
   digitalWriteFast(donePin, LOW);
   watchdogFlag = false;
-   d47ec:	4b04      	ldr	r3, [pc, #16]	; (d4800 <_Z11petWatchdogv+0x60>)
+   d47f4:	4b04      	ldr	r3, [pc, #16]	; (d4808 <_Z11petWatchdogv+0x60>)
 }
 
 
 __STATIC_INLINE void nrf_gpio_port_out_clear(NRF_GPIO_Type * p_reg, uint32_t clr_mask)
 {
     p_reg->OUTCLR = clr_mask;
-   d47ee:	f8c0 450c 	str.w	r4, [r0, #1292]	; 0x50c
-   d47f2:	2200      	movs	r2, #0
-   d47f4:	701a      	strb	r2, [r3, #0]
+   d47f6:	f8c0 450c 	str.w	r4, [r0, #1292]	; 0x50c
+   d47fa:	2200      	movs	r2, #0
+   d47fc:	701a      	strb	r2, [r3, #0]
 }
-   d47f6:	b003      	add	sp, #12
-   d47f8:	bd30      	pop	{r4, r5, pc}
-   d47fa:	bf00      	nop
-   d47fc:	2003df94 	.word	0x2003df94
-   d4800:	2003df64 	.word	0x2003df64
+   d47fe:	b003      	add	sp, #12
+   d4800:	bd30      	pop	{r4, r5, pc}
+   d4802:	bf00      	nop
+   d4804:	2003df94 	.word	0x2003df94
+   d4808:	2003df64 	.word	0x2003df64
 
-000d4804 <_Z14setPowerConfigv>:
+000d480c <_Z14setPowerConfigv>:
 
 
 // Power Management function
 int setPowerConfig() {
-   d4804:	b510      	push	{r4, lr}
+   d480c:	b510      	push	{r4, lr}
 
 class SystemPowerConfiguration {
 public:
 
     SystemPowerConfiguration()
             : conf_{} {
-   d4806:	2420      	movs	r4, #32
-   d4808:	b090      	sub	sp, #64	; 0x40
-   d480a:	4622      	mov	r2, r4
-   d480c:	2100      	movs	r1, #0
-   d480e:	4668      	mov	r0, sp
-   d4810:	f006 fd18 	bl	db244 <memset>
-   d4814:	4622      	mov	r2, r4
-   d4816:	2100      	movs	r1, #0
-   d4818:	eb0d 0004 	add.w	r0, sp, r4
+   d480e:	2420      	movs	r4, #32
+   d4810:	b090      	sub	sp, #64	; 0x40
+   d4812:	4622      	mov	r2, r4
+   d4814:	2100      	movs	r1, #0
+   d4816:	4668      	mov	r0, sp
+   d4818:	f006 fd14 	bl	db244 <memset>
+   d481c:	4622      	mov	r2, r4
+   d481e:	2100      	movs	r1, #0
+   d4820:	eb0d 0004 	add.w	r0, sp, r4
         conf_.size = sizeof(conf_);
-   d481c:	f88d 4005 	strb.w	r4, [sp, #5]
+   d4824:	f88d 4005 	strb.w	r4, [sp, #5]
 
 class SystemPowerConfiguration {
 public:
 
     SystemPowerConfiguration()
             : conf_{} {
-   d4820:	f006 fd10 	bl	db244 <memset>
+   d4828:	f006 fd0c 	bl	db244 <memset>
         return (hal_timer_millis(nullptr) / 1000);
     }
 
 #if HAL_PLATFORM_POWER_MANAGEMENT
     int setPowerConfiguration(const particle::SystemPowerConfiguration& conf) {
         return system_power_management_set_config(conf.config(), nullptr);
-   d4824:	2100      	movs	r1, #0
-   d4826:	eb0d 0004 	add.w	r0, sp, r4
+   d482c:	2100      	movs	r1, #0
+   d482e:	eb0d 0004 	add.w	r0, sp, r4
         conf_.size = sizeof(conf_);
-   d482a:	f88d 4025 	strb.w	r4, [sp, #37]	; 0x25
-   d482e:	f003 fc99 	bl	d8164 <system_power_management_set_config>
+   d4832:	f88d 4025 	strb.w	r4, [sp, #37]	; 0x25
+   d4836:	f003 fc95 	bl	d8164 <system_power_management_set_config>
         conf_.vin_min_voltage = voltage;
         return *this;
     }
 
     SystemPowerConfiguration& powerSourceMaxCurrent(uint16_t current) {
         conf_.vin_max_current = current;
-   d4832:	f44f 7361 	mov.w	r3, #900	; 0x384
-   d4836:	f8ad 3008 	strh.w	r3, [sp, #8]
+   d483a:	f44f 7361 	mov.w	r3, #900	; 0x384
+   d483e:	f8ad 3008 	strh.w	r3, [sp, #8]
         conf_.termination_voltage = voltage;
         return *this;
     }
 
     SystemPowerConfiguration& batteryChargeCurrent(uint16_t current) {
         conf_.charge_current = current;
-   d483a:	f8ad 300a 	strh.w	r3, [sp, #10]
+   d4842:	f8ad 300a 	strh.w	r3, [sp, #10]
         conf_.vin_max_current = current;
         return *this;
     }
 
     SystemPowerConfiguration& batteryChargeVoltage(uint16_t voltage) {
         conf_.termination_voltage = voltage;
-   d483e:	f241 0310 	movw	r3, #4112	; 0x1010
-   d4842:	f8ad 300c 	strh.w	r3, [sp, #12]
+   d4846:	f241 0310 	movw	r3, #4112	; 0x1010
+   d484a:	f8ad 300c 	strh.w	r3, [sp, #12]
         conf_.charge_current = current;
         return *this;
     }
 
     SystemPowerConfiguration& feature(EnumFlags<SystemPowerFeature> f) {
         conf_.flags |= f.value();
-   d4846:	9b00      	ldr	r3, [sp, #0]
+   d484e:	9b00      	ldr	r3, [sp, #0]
 
     SystemPowerConfiguration(SystemPowerConfiguration&&) = default;
     SystemPowerConfiguration& operator=(SystemPowerConfiguration&&) = default;
 
     SystemPowerConfiguration& powerSourceMinVoltage(uint16_t voltage) {
         conf_.vin_min_voltage = voltage;
-   d4848:	f241 0270 	movw	r2, #4208	; 0x1070
+   d4850:	f241 0270 	movw	r2, #4208	; 0x1070
         conf_.charge_current = current;
         return *this;
     }
 
     SystemPowerConfiguration& feature(EnumFlags<SystemPowerFeature> f) {
         conf_.flags |= f.value();
-   d484c:	f443 7300 	orr.w	r3, r3, #512	; 0x200
-   d4850:	2100      	movs	r1, #0
-   d4852:	4668      	mov	r0, sp
+   d4854:	f443 7300 	orr.w	r3, r3, #512	; 0x200
+   d4858:	2100      	movs	r1, #0
+   d485a:	4668      	mov	r0, sp
 
     SystemPowerConfiguration(SystemPowerConfiguration&&) = default;
     SystemPowerConfiguration& operator=(SystemPowerConfiguration&&) = default;
 
     SystemPowerConfiguration& powerSourceMinVoltage(uint16_t voltage) {
         conf_.vin_min_voltage = voltage;
-   d4854:	f8ad 2006 	strh.w	r2, [sp, #6]
+   d485c:	f8ad 2006 	strh.w	r2, [sp, #6]
         conf_.charge_current = current;
         return *this;
     }
 
     SystemPowerConfiguration& feature(EnumFlags<SystemPowerFeature> f) {
         conf_.flags |= f.value();
-   d4858:	9300      	str	r3, [sp, #0]
-   d485a:	f003 fc83 	bl	d8164 <system_power_management_set_config>
+   d4860:	9300      	str	r3, [sp, #0]
+   d4862:	f003 fc7f 	bl	d8164 <system_power_management_set_config>
       .batteryChargeCurrent(900)                                    // higher charge current from DC-IN when not solar powered
       .batteryChargeVoltage(4112)                                   // default is 4.112V termination voltage
       .feature(SystemPowerFeature::USE_VIN_SETTINGS_WITH_USB_HOST) ;
   int res = System.setPowerConfiguration(conf); // returns SYSTEM_ERROR_NONE (0) in case of success
   return res;
 }
-   d485e:	b010      	add	sp, #64	; 0x40
-   d4860:	bd10      	pop	{r4, pc}
+   d4866:	b010      	add	sp, #64	; 0x40
+   d4868:	bd10      	pop	{r4, pc}
 	...
 
-000d4864 <_Z17connectToParticlev>:
+000d486c <_Z17connectToParticlev>:
 
  // These are the particle functions that allow you to configure and run the device
  // They are intended to allow for customization and control during installations
  // and to allow for management.
 
 bool connectToParticle() {
-   d4864:	e92d 43f8 	stmdb	sp!, {r3, r4, r5, r6, r7, r8, r9, lr}
+   d486c:	e92d 43f8 	stmdb	sp!, {r3, r4, r5, r6, r7, r8, r9, lr}
 
     IPAddress localIP() {
         return IPAddress(((CellularConfig*)network_config(*this, 0, NULL))->nw.aucIP);
     }
     void on() {
         network_on(*this, 0, 0, NULL);
-   d4868:	481d      	ldr	r0, [pc, #116]	; (d48e0 <_Z17connectToParticlev+0x7c>)
+   d4870:	481d      	ldr	r0, [pc, #116]	; (d48e8 <_Z17connectToParticlev+0x7c>)
 	/**
 	 * Lifesign that the application is still working normally.
 	 */
 	static void checkin()
 	{
 		last_checkin = current_time();
-   d486a:	4d1e      	ldr	r5, [pc, #120]	; (d48e4 <_Z17connectToParticlev+0x80>)
-   d486c:	6840      	ldr	r0, [r0, #4]
-   d486e:	2300      	movs	r3, #0
-   d4870:	461a      	mov	r2, r3
-   d4872:	4619      	mov	r1, r3
-   d4874:	f003 fd08 	bl	d8288 <network_on>
+   d4872:	4d1e      	ldr	r5, [pc, #120]	; (d48ec <_Z17connectToParticlev+0x80>)
+   d4874:	6840      	ldr	r0, [r0, #4]
+   d4876:	2300      	movs	r3, #0
+   d4878:	461a      	mov	r2, r3
+   d487a:	4619      	mov	r1, r3
+   d487c:	f003 fd04 	bl	d8288 <network_on>
     static bool disconnected(void) { return !connected(); }
     static void connect(void) {
         spark_cloud_flag_connect();
-   d4878:	f003 fc96 	bl	d81a8 <spark_cloud_flag_connect>
-   d487c:	f44f 7496 	mov.w	r4, #300	; 0x12c
+   d4880:	f003 fc92 	bl	d81a8 <spark_cloud_flag_connect>
+   d4884:	f44f 7496 	mov.w	r4, #300	; 0x12c
 
 
     static uint32_t freeMemory();
 
     template<typename Condition, typename While> static bool waitConditionWhile(Condition _condition, While _while) {
         while (_while() && !_condition()) {
-   d4880:	f240 36e7 	movw	r6, #999	; 0x3e7
-   d4884:	2700      	movs	r7, #0
+   d4888:	f240 36e7 	movw	r6, #999	; 0x3e7
+   d488c:	2700      	movs	r7, #0
     template<typename Condition> static bool waitCondition(Condition _condition) {
         return waitConditionWhile(_condition, []{ return true; });
     }
 
     template<typename Condition> static bool waitCondition(Condition _condition, system_tick_t timeout) {
         const system_tick_t start = millis();
-   d4886:	f7ff fcfe 	bl	d4286 <_ZN11SystemClass6millisEv>
+   d488e:	f7ff fcfa 	bl	d4286 <_ZN11SystemClass6millisEv>
 
 
     static uint32_t freeMemory();
 
     template<typename Condition, typename While> static bool waitConditionWhile(Condition _condition, While _while) {
         while (_while() && !_condition()) {
-   d488a:	f04f 0900 	mov.w	r9, #0
-   d488e:	4680      	mov	r8, r0
+   d4892:	f04f 0900 	mov.w	r9, #0
+   d4896:	4680      	mov	r8, r0
         return waitConditionWhile(_condition, []{ return true; });
     }
 
     template<typename Condition> static bool waitCondition(Condition _condition, system_tick_t timeout) {
         const system_tick_t start = millis();
         return waitConditionWhile(_condition, [=]{ return (millis()-start)<timeout; });
-   d4890:	f7ff fcf9 	bl	d4286 <_ZN11SystemClass6millisEv>
+   d4898:	f7ff fcf5 	bl	d4286 <_ZN11SystemClass6millisEv>
 
 
     static uint32_t freeMemory();
 
     template<typename Condition, typename While> static bool waitConditionWhile(Condition _condition, While _while) {
         while (_while() && !_condition()) {
-   d4894:	ebb0 0008 	subs.w	r0, r0, r8
-   d4898:	eb61 0109 	sbc.w	r1, r1, r9
-   d489c:	428f      	cmp	r7, r1
-   d489e:	bf08      	it	eq
-   d48a0:	4286      	cmpeq	r6, r0
-   d48a2:	d305      	bcc.n	d48b0 <_Z17connectToParticlev+0x4c>
+   d489c:	ebb0 0008 	subs.w	r0, r0, r8
+   d48a0:	eb61 0109 	sbc.w	r1, r1, r9
+   d48a4:	428f      	cmp	r7, r1
+   d48a6:	bf08      	it	eq
+   d48a8:	4286      	cmpeq	r6, r0
+   d48aa:	d305      	bcc.n	d48b8 <_Z17connectToParticlev+0x4c>
     static void sleep(Spark_Sleep_TypeDef sleepMode, long seconds=0) __attribute__ ((deprecated("Please use System.sleep() instead.")))
     { SystemClass::sleep(sleepMode, seconds); }
     static void sleep(uint16_t wakeUpPin, InterruptMode edgeTriggerMode, long seconds=0) __attribute__ ((deprecated("Please use System.sleep() instead.")))
     { SystemClass::sleep(wakeUpPin, edgeTriggerMode, seconds); }
 
     static bool connected(void) { return spark_cloud_flag_connected(); }
-   d48a4:	f003 fc90 	bl	d81c8 <spark_cloud_flag_connected>
-   d48a8:	b910      	cbnz	r0, d48b0 <_Z17connectToParticlev+0x4c>
+   d48ac:	f003 fc8c 	bl	d81c8 <spark_cloud_flag_connected>
+   d48b0:	b910      	cbnz	r0, d48b8 <_Z17connectToParticlev+0x4c>
             spark_process();
-   d48aa:	f003 fc75 	bl	d8198 <spark_process>
-   d48ae:	e7ef      	b.n	d4890 <_Z17connectToParticlev+0x2c>
-   d48b0:	f003 fc8a 	bl	d81c8 <spark_cloud_flag_connected>
+   d48b2:	f003 fc71 	bl	d8198 <spark_process>
+   d48b6:	e7ef      	b.n	d4898 <_Z17connectToParticlev+0x2c>
+   d48b8:	f003 fc86 	bl	d81c8 <spark_cloud_flag_connected>
   Cellular.on();
   Particle.connect();
   // wait for *up to* 5 minutes
   for (int retry = 0; retry < 300 && !waitFor(Particle.connected,1000); retry++) {
-   d48b4:	b158      	cbz	r0, d48ce <_Z17connectToParticlev+0x6a>
-   d48b6:	f003 fc87 	bl	d81c8 <spark_cloud_flag_connected>
+   d48bc:	b158      	cbz	r0, d48d6 <_Z17connectToParticlev+0x6a>
+   d48be:	f003 fc83 	bl	d81c8 <spark_cloud_flag_connected>
 
     Particle.process();
   }
   if (Particle.connected()) {
-   d48ba:	b130      	cbz	r0, d48ca <_Z17connectToParticlev+0x66>
+   d48c2:	b130      	cbz	r0, d48d2 <_Z17connectToParticlev+0x66>
     sysStatus.connectedStatus = true;
-   d48bc:	4a0a      	ldr	r2, [pc, #40]	; (d48e8 <_Z17connectToParticlev+0x84>)
-   d48be:	2301      	movs	r3, #1
-   d48c0:	70d3      	strb	r3, [r2, #3]
+   d48c4:	4a0a      	ldr	r2, [pc, #40]	; (d48f0 <_Z17connectToParticlev+0x84>)
+   d48c6:	2301      	movs	r3, #1
+   d48c8:	70d3      	strb	r3, [r2, #3]
     systemStatusWriteNeeded = true;
-   d48c2:	4a0a      	ldr	r2, [pc, #40]	; (d48ec <_Z17connectToParticlev+0x88>)
-   d48c4:	7013      	strb	r3, [r2, #0]
+   d48ca:	4a0a      	ldr	r2, [pc, #40]	; (d48f4 <_Z17connectToParticlev+0x88>)
+   d48cc:	7013      	strb	r3, [r2, #0]
     return 1;                               // Were able to connect successfully
-   d48c6:	e8bd 83f8 	ldmia.w	sp!, {r3, r4, r5, r6, r7, r8, r9, pc}
-   d48ca:	e8bd 83f8 	ldmia.w	sp!, {r3, r4, r5, r6, r7, r8, r9, pc}
+   d48ce:	e8bd 83f8 	ldmia.w	sp!, {r3, r4, r5, r6, r7, r8, r9, pc}
+   d48d2:	e8bd 83f8 	ldmia.w	sp!, {r3, r4, r5, r6, r7, r8, r9, pc}
 		return !timeout_fn;
 	}
 
 	static inline system_tick_t current_time()
 	{
 		return HAL_Timer_Get_Milli_Seconds();
-   d48ce:	f003 fa1b 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d48d6:	f003 fa17 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
 	/**
 	 * Lifesign that the application is still working normally.
 	 */
 	static void checkin()
 	{
 		last_checkin = current_time();
-   d48d2:	6028      	str	r0, [r5, #0]
+   d48da:	6028      	str	r0, [r5, #0]
         spark_cloud_flag_connect();
     }
     static void disconnect(void) { spark_cloud_flag_disconnect(); }
     static void process(void) {
     		application_checkin();
     		spark_process();
-   d48d4:	f003 fc60 	bl	d8198 <spark_process>
+   d48dc:	f003 fc5c 	bl	d8198 <spark_process>
 
 bool connectToParticle() {
   Cellular.on();
   Particle.connect();
   // wait for *up to* 5 minutes
   for (int retry = 0; retry < 300 && !waitFor(Particle.connected,1000); retry++) {
-   d48d8:	3c01      	subs	r4, #1
-   d48da:	d0ec      	beq.n	d48b6 <_Z17connectToParticlev+0x52>
-   d48dc:	e7d3      	b.n	d4886 <_Z17connectToParticlev+0x22>
-   d48de:	bf00      	nop
-   d48e0:	2003e25c 	.word	0x2003e25c
-   d48e4:	2003e608 	.word	0x2003e608
-   d48e8:	2003e04c 	.word	0x2003e04c
-   d48ec:	2003df58 	.word	0x2003df58
+   d48e0:	3c01      	subs	r4, #1
+   d48e2:	d0ec      	beq.n	d48be <_Z17connectToParticlev+0x52>
+   d48e4:	e7d3      	b.n	d488e <_Z17connectToParticlev+0x22>
+   d48e6:	bf00      	nop
+   d48e8:	2003e25c 	.word	0x2003e25c
+   d48ec:	2003e608 	.word	0x2003e608
+   d48f0:	2003e04c 	.word	0x2003e04c
+   d48f4:	2003df58 	.word	0x2003df58
 
-000d48f0 <_Z12notConnectedv>:
+000d48f8 <_Z12notConnectedv>:
   systemStatusWriteNeeded = true;
   delay(2000);                                                    // Bummer but only should happen once an hour
   return true;
 }
 
 bool notConnected() {                                             // Companion function for disconnectFromParticle
-   d48f0:	b508      	push	{r3, lr}
+   d48f8:	b508      	push	{r3, lr}
     static void sleep(Spark_Sleep_TypeDef sleepMode, long seconds=0) __attribute__ ((deprecated("Please use System.sleep() instead.")))
     { SystemClass::sleep(sleepMode, seconds); }
     static void sleep(uint16_t wakeUpPin, InterruptMode edgeTriggerMode, long seconds=0) __attribute__ ((deprecated("Please use System.sleep() instead.")))
     { SystemClass::sleep(wakeUpPin, edgeTriggerMode, seconds); }
 
     static bool connected(void) { return spark_cloud_flag_connected(); }
-   d48f2:	f003 fc69 	bl	d81c8 <spark_cloud_flag_connected>
+   d48fa:	f003 fc65 	bl	d81c8 <spark_cloud_flag_connected>
   return !Particle.connected();
-   d48f6:	f080 0001 	eor.w	r0, r0, #1
+   d48fe:	f080 0001 	eor.w	r0, r0, #1
 }
-   d48fa:	b2c0      	uxtb	r0, r0
-   d48fc:	bd08      	pop	{r3, pc}
+   d4902:	b2c0      	uxtb	r0, r0
+   d4904:	bd08      	pop	{r3, pc}
 	...
 
-000d4900 <_Z22disconnectFromParticlev>:
+000d4908 <_Z22disconnectFromParticlev>:
     return 0;                                                    // Failed to connect
   }
 }
 
 bool disconnectFromParticle()                                     // Ensures we disconnect cleanly from Particle
 {
-   d4900:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+   d4908:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
     static bool disconnected(void) { return !connected(); }
     static void connect(void) {
         spark_cloud_flag_connect();
     }
     static void disconnect(void) { spark_cloud_flag_disconnect(); }
-   d4902:	f003 fc59 	bl	d81b8 <spark_cloud_flag_disconnect>
+   d490a:	f003 fc55 	bl	d81b8 <spark_cloud_flag_disconnect>
     template<typename Condition> static bool waitCondition(Condition _condition) {
         return waitConditionWhile(_condition, []{ return true; });
     }
 
     template<typename Condition> static bool waitCondition(Condition _condition, system_tick_t timeout) {
         const system_tick_t start = millis();
-   d4906:	f7ff fcbe 	bl	d4286 <_ZN11SystemClass6millisEv>
+   d490e:	f7ff fcba 	bl	d4286 <_ZN11SystemClass6millisEv>
 
 
     static uint32_t freeMemory();
 
     template<typename Condition, typename While> static bool waitConditionWhile(Condition _condition, While _while) {
         while (_while() && !_condition()) {
-   d490a:	2500      	movs	r5, #0
-   d490c:	4604      	mov	r4, r0
-   d490e:	f643 2697 	movw	r6, #14999	; 0x3a97
-   d4912:	2700      	movs	r7, #0
+   d4912:	2500      	movs	r5, #0
+   d4914:	4604      	mov	r4, r0
+   d4916:	f643 2697 	movw	r6, #14999	; 0x3a97
+   d491a:	2700      	movs	r7, #0
         return waitConditionWhile(_condition, []{ return true; });
     }
 
     template<typename Condition> static bool waitCondition(Condition _condition, system_tick_t timeout) {
         const system_tick_t start = millis();
         return waitConditionWhile(_condition, [=]{ return (millis()-start)<timeout; });
-   d4914:	f7ff fcb7 	bl	d4286 <_ZN11SystemClass6millisEv>
+   d491c:	f7ff fcb3 	bl	d4286 <_ZN11SystemClass6millisEv>
 
 
     static uint32_t freeMemory();
 
     template<typename Condition, typename While> static bool waitConditionWhile(Condition _condition, While _while) {
         while (_while() && !_condition()) {
-   d4918:	1b00      	subs	r0, r0, r4
-   d491a:	eb61 0105 	sbc.w	r1, r1, r5
-   d491e:	428f      	cmp	r7, r1
-   d4920:	bf08      	it	eq
-   d4922:	4286      	cmpeq	r6, r0
-   d4924:	d305      	bcc.n	d4932 <_Z22disconnectFromParticlev+0x32>
+   d4920:	1b00      	subs	r0, r0, r4
+   d4922:	eb61 0105 	sbc.w	r1, r1, r5
+   d4926:	428f      	cmp	r7, r1
+   d4928:	bf08      	it	eq
+   d492a:	4286      	cmpeq	r6, r0
+   d492c:	d305      	bcc.n	d493a <_Z22disconnectFromParticlev+0x32>
   Particle.disconnect();
   waitFor(notConnected, 15000);                                   // make sure before turning off the cellular modem
-   d4926:	f7ff ffe3 	bl	d48f0 <_Z12notConnectedv>
-   d492a:	b910      	cbnz	r0, d4932 <_Z22disconnectFromParticlev+0x32>
+   d492e:	f7ff ffe3 	bl	d48f8 <_Z12notConnectedv>
+   d4932:	b910      	cbnz	r0, d493a <_Z22disconnectFromParticlev+0x32>
             spark_process();
-   d492c:	f003 fc34 	bl	d8198 <spark_process>
-   d4930:	e7f0      	b.n	d4914 <_Z22disconnectFromParticlev+0x14>
-   d4932:	f7ff ffdd 	bl	d48f0 <_Z12notConnectedv>
+   d4934:	f003 fc30 	bl	d8198 <spark_process>
+   d4938:	e7f0      	b.n	d491c <_Z22disconnectFromParticlev+0x14>
+   d493a:	f7ff ffdd 	bl	d48f8 <_Z12notConnectedv>
     }
     void off() {
         network_off(*this, 0, 0, NULL);
-   d4936:	4809      	ldr	r0, [pc, #36]	; (d495c <_Z22disconnectFromParticlev+0x5c>)
-   d4938:	2300      	movs	r3, #0
-   d493a:	4619      	mov	r1, r3
-   d493c:	461a      	mov	r2, r3
-   d493e:	6840      	ldr	r0, [r0, #4]
-   d4940:	f003 fcaa 	bl	d8298 <network_off>
+   d493e:	4809      	ldr	r0, [pc, #36]	; (d4964 <_Z22disconnectFromParticlev+0x5c>)
+   d4940:	2300      	movs	r3, #0
+   d4942:	4619      	mov	r1, r3
+   d4944:	461a      	mov	r2, r3
+   d4946:	6840      	ldr	r0, [r0, #4]
+   d4948:	f003 fca6 	bl	d8298 <network_off>
   Cellular.off();
   sysStatus.connectedStatus = false;
-   d4944:	4b06      	ldr	r3, [pc, #24]	; (d4960 <_Z22disconnectFromParticlev+0x60>)
-   d4946:	2200      	movs	r2, #0
-   d4948:	70da      	strb	r2, [r3, #3]
+   d494c:	4b06      	ldr	r3, [pc, #24]	; (d4968 <_Z22disconnectFromParticlev+0x60>)
+   d494e:	2200      	movs	r2, #0
+   d4950:	70da      	strb	r2, [r3, #3]
   systemStatusWriteNeeded = true;
-   d494a:	4b06      	ldr	r3, [pc, #24]	; (d4964 <_Z22disconnectFromParticlev+0x64>)
-   d494c:	2401      	movs	r4, #1
+   d4952:	4b06      	ldr	r3, [pc, #24]	; (d496c <_Z22disconnectFromParticlev+0x64>)
+   d4954:	2401      	movs	r4, #1
   delay(2000);                                                    // Bummer but only should happen once an hour
-   d494e:	f44f 60fa 	mov.w	r0, #2000	; 0x7d0
+   d4956:	f44f 60fa 	mov.w	r0, #2000	; 0x7d0
 {
   Particle.disconnect();
   waitFor(notConnected, 15000);                                   // make sure before turning off the cellular modem
   Cellular.off();
   sysStatus.connectedStatus = false;
   systemStatusWriteNeeded = true;
-   d4952:	701c      	strb	r4, [r3, #0]
+   d495a:	701c      	strb	r4, [r3, #0]
   delay(2000);                                                    // Bummer but only should happen once an hour
-   d4954:	f003 fd18 	bl	d8388 <delay>
+   d495c:	f003 fd14 	bl	d8388 <delay>
   return true;
 }
-   d4958:	4620      	mov	r0, r4
-   d495a:	bdf8      	pop	{r3, r4, r5, r6, r7, pc}
-   d495c:	2003e25c 	.word	0x2003e25c
-   d4960:	2003e04c 	.word	0x2003e04c
-   d4964:	2003df58 	.word	0x2003df58
+   d4960:	4620      	mov	r0, r4
+   d4962:	bdf8      	pop	{r3, r4, r5, r6, r7, pc}
+   d4964:	2003e25c 	.word	0x2003e25c
+   d4968:	2003e04c 	.word	0x2003e04c
+   d496c:	2003df58 	.word	0x2003df58
 
-000d4968 <_Z22publishStateTransitionv>:
-
-  return 1;
-}
-
-void publishStateTransition(void)
-{
-   d4968:	b530      	push	{r4, r5, lr}
-  char stateTransitionString[40];
-  snprintf(stateTransitionString, sizeof(stateTransitionString), "From %s to %s", stateNames[oldState],stateNames[state]);
-   d496a:	4d13      	ldr	r5, [pc, #76]	; (d49b8 <_Z22publishStateTransitionv+0x50>)
-   d496c:	4c13      	ldr	r4, [pc, #76]	; (d49bc <_Z22publishStateTransitionv+0x54>)
-   d496e:	4914      	ldr	r1, [pc, #80]	; (d49c0 <_Z22publishStateTransitionv+0x58>)
-   d4970:	782a      	ldrb	r2, [r5, #0]
-   d4972:	7820      	ldrb	r0, [r4, #0]
+000d4970 <_Z22publishStateTransitionv>:
 
   return 1;
 }
 
 void publishStateTransition(void)
 {
-   d4974:	b08d      	sub	sp, #52	; 0x34
+   d4970:	b530      	push	{r4, r5, lr}
   char stateTransitionString[40];
   snprintf(stateTransitionString, sizeof(stateTransitionString), "From %s to %s", stateNames[oldState],stateNames[state]);
-   d4976:	230e      	movs	r3, #14
-   d4978:	fb03 1202 	mla	r2, r3, r2, r1
-   d497c:	9200      	str	r2, [sp, #0]
-   d497e:	fb03 1300 	mla	r3, r3, r0, r1
-   d4982:	4a10      	ldr	r2, [pc, #64]	; (d49c4 <_Z22publishStateTransitionv+0x5c>)
-   d4984:	2128      	movs	r1, #40	; 0x28
-   d4986:	a802      	add	r0, sp, #8
-   d4988:	f003 fcd6 	bl	d8338 <snprintf>
+   d4972:	4d13      	ldr	r5, [pc, #76]	; (d49c0 <_Z22publishStateTransitionv+0x50>)
+   d4974:	4c13      	ldr	r4, [pc, #76]	; (d49c4 <_Z22publishStateTransitionv+0x54>)
+   d4976:	4914      	ldr	r1, [pc, #80]	; (d49c8 <_Z22publishStateTransitionv+0x58>)
+   d4978:	782a      	ldrb	r2, [r5, #0]
+   d497a:	7820      	ldrb	r0, [r4, #0]
+
+  return 1;
+}
+
+void publishStateTransition(void)
+{
+   d497c:	b08d      	sub	sp, #52	; 0x34
+  char stateTransitionString[40];
+  snprintf(stateTransitionString, sizeof(stateTransitionString), "From %s to %s", stateNames[oldState],stateNames[state]);
+   d497e:	230e      	movs	r3, #14
+   d4980:	fb03 1202 	mla	r2, r3, r2, r1
+   d4984:	9200      	str	r2, [sp, #0]
+   d4986:	fb03 1300 	mla	r3, r3, r0, r1
+   d498a:	4a10      	ldr	r2, [pc, #64]	; (d49cc <_Z22publishStateTransitionv+0x5c>)
+   d498c:	2128      	movs	r1, #40	; 0x28
+   d498e:	a802      	add	r0, sp, #8
+   d4990:	f003 fcd2 	bl	d8338 <snprintf>
   oldState = state;
-   d498c:	782b      	ldrb	r3, [r5, #0]
-   d498e:	7023      	strb	r3, [r4, #0]
+   d4994:	782b      	ldrb	r3, [r5, #0]
+   d4996:	7023      	strb	r3, [r4, #0]
     static void sleep(Spark_Sleep_TypeDef sleepMode, long seconds=0) __attribute__ ((deprecated("Please use System.sleep() instead.")))
     { SystemClass::sleep(sleepMode, seconds); }
     static void sleep(uint16_t wakeUpPin, InterruptMode edgeTriggerMode, long seconds=0) __attribute__ ((deprecated("Please use System.sleep() instead.")))
     { SystemClass::sleep(wakeUpPin, edgeTriggerMode, seconds); }
 
     static bool connected(void) { return spark_cloud_flag_connected(); }
-   d4990:	f003 fc1a 	bl	d81c8 <spark_cloud_flag_connected>
+   d4998:	f003 fc16 	bl	d81c8 <spark_cloud_flag_connected>
   if(Particle.connected()) publishQueue.publish("State Transition",stateTransitionString, PRIVATE);
-   d4994:	b148      	cbz	r0, d49aa <_Z22publishStateTransitionv+0x42>
-   d4996:	4b0c      	ldr	r3, [pc, #48]	; (d49c8 <_Z22publishStateTransitionv+0x60>)
-   d4998:	490c      	ldr	r1, [pc, #48]	; (d49cc <_Z22publishStateTransitionv+0x64>)
-   d499a:	781b      	ldrb	r3, [r3, #0]
-   d499c:	480c      	ldr	r0, [pc, #48]	; (d49d0 <_Z22publishStateTransitionv+0x68>)
+   d499c:	b148      	cbz	r0, d49b2 <_Z22publishStateTransitionv+0x42>
+   d499e:	4b0c      	ldr	r3, [pc, #48]	; (d49d0 <_Z22publishStateTransitionv+0x60>)
+   d49a0:	490c      	ldr	r1, [pc, #48]	; (d49d4 <_Z22publishStateTransitionv+0x64>)
+   d49a2:	781b      	ldrb	r3, [r3, #0]
+   d49a4:	480c      	ldr	r0, [pc, #48]	; (d49d8 <_Z22publishStateTransitionv+0x68>)
 }
 
 // particle::Flags<TagT, ValueT>
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags() :
         val_(0) {
-   d499e:	2200      	movs	r2, #0
-   d49a0:	f88d 2000 	strb.w	r2, [sp]
-   d49a4:	aa02      	add	r2, sp, #8
-   d49a6:	f7ff fc99 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
+   d49a6:	2200      	movs	r2, #0
+   d49a8:	f88d 2000 	strb.w	r2, [sp]
+   d49ac:	aa02      	add	r2, sp, #8
+   d49ae:	f7ff fc95 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
   Serial.println(stateTransitionString);
-   d49aa:	f005 fa4b 	bl	d9e44 <_Z16_fetch_usbserialv>
-   d49ae:	a902      	add	r1, sp, #8
-   d49b0:	f004 fc79 	bl	d92a6 <_ZN5Print7printlnEPKc>
+   d49b2:	f005 fa47 	bl	d9e44 <_Z16_fetch_usbserialv>
+   d49b6:	a902      	add	r1, sp, #8
+   d49b8:	f004 fc75 	bl	d92a6 <_ZN5Print7printlnEPKc>
 }
-   d49b4:	b00d      	add	sp, #52	; 0x34
-   d49b6:	bd30      	pop	{r4, r5, pc}
-   d49b8:	2003df59 	.word	0x2003df59
-   d49bc:	2003df40 	.word	0x2003df40
-   d49c0:	2003dd50 	.word	0x2003dd50
-   d49c4:	000dcbd7 	.word	0x000dcbd7
-   d49c8:	2003df0c 	.word	0x2003df0c
-   d49cc:	000dcbe5 	.word	0x000dcbe5
-   d49d0:	2003deac 	.word	0x2003deac
+   d49bc:	b00d      	add	sp, #52	; 0x34
+   d49be:	bd30      	pop	{r4, r5, pc}
+   d49c0:	2003df59 	.word	0x2003df59
+   d49c4:	2003df40 	.word	0x2003df40
+   d49c8:	2003dd50 	.word	0x2003dd50
+   d49cc:	000dcbd7 	.word	0x000dcbd7
+   d49d0:	2003df0c 	.word	0x2003df0c
+   d49d4:	000dcbe5 	.word	0x000dcbe5
+   d49d8:	2003deac 	.word	0x2003deac
 
-000d49d4 <_Z14fullModemResetv>:
+000d49dc <_Z14fullModemResetv>:
 
 void fullModemReset() {  // Adapted form Rikkas7's https://github.com/rickkas7/electronsample
-   d49d4:	b537      	push	{r0, r1, r2, r4, r5, lr}
+   d49dc:	b537      	push	{r0, r1, r2, r4, r5, lr}
     static bool disconnected(void) { return !connected(); }
     static void connect(void) {
         spark_cloud_flag_connect();
     }
     static void disconnect(void) { spark_cloud_flag_disconnect(); }
-   d49d6:	f003 fbef 	bl	d81b8 <spark_cloud_flag_disconnect>
-   d49da:	f003 f995 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d49de:	f003 fbeb 	bl	d81b8 <spark_cloud_flag_disconnect>
+   d49e2:	f003 f991 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
 	Particle.disconnect(); 	                                         // Disconnect from the cloud
 	unsigned long startTime = millis();  	                           // Wait up to 15 seconds to disconnect
 	while(Particle.connected() && millis() - startTime < 15000) {
-   d49de:	f643 2597 	movw	r5, #14999	; 0x3a97
-   d49e2:	4604      	mov	r4, r0
+   d49e6:	f643 2597 	movw	r5, #14999	; 0x3a97
+   d49ea:	4604      	mov	r4, r0
     static void sleep(Spark_Sleep_TypeDef sleepMode, long seconds=0) __attribute__ ((deprecated("Please use System.sleep() instead.")))
     { SystemClass::sleep(sleepMode, seconds); }
     static void sleep(uint16_t wakeUpPin, InterruptMode edgeTriggerMode, long seconds=0) __attribute__ ((deprecated("Please use System.sleep() instead.")))
     { SystemClass::sleep(wakeUpPin, edgeTriggerMode, seconds); }
 
     static bool connected(void) { return spark_cloud_flag_connected(); }
-   d49e4:	f003 fbf0 	bl	d81c8 <spark_cloud_flag_connected>
-   d49e8:	b140      	cbz	r0, d49fc <_Z14fullModemResetv+0x28>
-   d49ea:	f003 f98d 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
-   d49ee:	1b00      	subs	r0, r0, r4
-   d49f0:	42a8      	cmp	r0, r5
-   d49f2:	d803      	bhi.n	d49fc <_Z14fullModemResetv+0x28>
+   d49ec:	f003 fbec 	bl	d81c8 <spark_cloud_flag_connected>
+   d49f0:	b140      	cbz	r0, d4a04 <_Z14fullModemResetv+0x28>
+   d49f2:	f003 f989 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d49f6:	1b00      	subs	r0, r0, r4
+   d49f8:	42a8      	cmp	r0, r5
+   d49fa:	d803      	bhi.n	d4a04 <_Z14fullModemResetv+0x28>
 		delay(100);
-   d49f4:	2064      	movs	r0, #100	; 0x64
-   d49f6:	f003 fcc7 	bl	d8388 <delay>
+   d49fc:	2064      	movs	r0, #100	; 0x64
+   d49fe:	f003 fcc3 	bl	d8388 <delay>
 }
 
 void fullModemReset() {  // Adapted form Rikkas7's https://github.com/rickkas7/electronsample
 	Particle.disconnect(); 	                                         // Disconnect from the cloud
 	unsigned long startTime = millis();  	                           // Wait up to 15 seconds to disconnect
 	while(Particle.connected() && millis() - startTime < 15000) {
-   d49fa:	e7f3      	b.n	d49e4 <_Z14fullModemResetv+0x10>
+   d4a02:	e7f3      	b.n	d49ec <_Z14fullModemResetv+0x10>
     }
 
     template<typename... Targs>
     inline int command(system_tick_t timeout_ms, const char* format, Targs... Fargs)
     {
         return cellular_command(NULL, NULL, timeout_ms, format, Fargs...);
-   d49fc:	2100      	movs	r1, #0
-   d49fe:	4b09      	ldr	r3, [pc, #36]	; (d4a24 <_Z14fullModemResetv+0x50>)
-   d4a00:	f247 5230 	movw	r2, #30000	; 0x7530
-   d4a04:	4608      	mov	r0, r1
-   d4a06:	f003 f8e7 	bl	d7bd8 <cellular_command>
+   d4a04:	2100      	movs	r1, #0
+   d4a06:	4b09      	ldr	r3, [pc, #36]	; (d4a2c <_Z14fullModemResetv+0x50>)
+   d4a08:	f247 5230 	movw	r2, #30000	; 0x7530
+   d4a0c:	4608      	mov	r0, r1
+   d4a0e:	f003 f8e3 	bl	d7bd8 <cellular_command>
 		delay(100);
 	}
 	// Reset the modem and SIM card
 	// 16:MT silent reset (with detach from network and saving of NVM parameters), with reset of the SIM card
 	Cellular.command(30000, "AT+CFUN=15\r\n");
 	delay(1000);
-   d4a0a:	f44f 707a 	mov.w	r0, #1000	; 0x3e8
-   d4a0e:	f003 fcbb 	bl	d8388 <delay>
+   d4a12:	f44f 707a 	mov.w	r0, #1000	; 0x3e8
+   d4a16:	f003 fcb7 	bl	d8388 <delay>
 	// Go into deep sleep for 10 seconds to try to reset everything. This turns off the modem as well.
 	System.sleep(SLEEP_MODE_DEEP, 10);
-   d4a12:	4b05      	ldr	r3, [pc, #20]	; (d4a28 <_Z14fullModemResetv+0x54>)
-   d4a14:	220a      	movs	r2, #10
-   d4a16:	681b      	ldr	r3, [r3, #0]
-   d4a18:	2101      	movs	r1, #1
-   d4a1a:	4668      	mov	r0, sp
-   d4a1c:	f004 ff1e 	bl	d985c <_ZN11SystemClass5sleepE19Spark_Sleep_TypeDeflN8particle5FlagsI19SleepOptionFlagTypemEE>
+   d4a1a:	4b05      	ldr	r3, [pc, #20]	; (d4a30 <_Z14fullModemResetv+0x54>)
+   d4a1c:	220a      	movs	r2, #10
+   d4a1e:	681b      	ldr	r3, [r3, #0]
+   d4a20:	2101      	movs	r1, #1
+   d4a22:	4668      	mov	r0, sp
+   d4a24:	f004 ff1a 	bl	d985c <_ZN11SystemClass5sleepE19Spark_Sleep_TypeDeflN8particle5FlagsI19SleepOptionFlagTypemEE>
 }
-   d4a20:	b003      	add	sp, #12
-   d4a22:	bd30      	pop	{r4, r5, pc}
-   d4a24:	000dcbf6 	.word	0x000dcbf6
-   d4a28:	2003df80 	.word	0x2003df80
+   d4a28:	b003      	add	sp, #12
+   d4a2a:	bd30      	pop	{r4, r5, pc}
+   d4a2c:	000dcbf6 	.word	0x000dcbf6
+   d4a30:	2003df80 	.word	0x2003df80
 
-000d4a2c <_Z12dailyCleanupv>:
+000d4a34 <_Z12dailyCleanupv>:
 
 void dailyCleanup() {                                                 // Called from Reporting State ONLY - clean house at the end of the day
-   d4a2c:	b5f7      	push	{r0, r1, r2, r4, r5, r6, r7, lr}
-   d4a2e:	4b15      	ldr	r3, [pc, #84]	; (d4a84 <_Z12dailyCleanupv+0x58>)
+   d4a34:	b5f7      	push	{r0, r1, r2, r4, r5, r6, r7, lr}
+   d4a36:	4b15      	ldr	r3, [pc, #84]	; (d4a8c <_Z12dailyCleanupv+0x58>)
   publishQueue.publish("Daily Cleanup","Running", PRIVATE);               // Make sure this is being run
-   d4a30:	4a15      	ldr	r2, [pc, #84]	; (d4a88 <_Z12dailyCleanupv+0x5c>)
+   d4a38:	4a15      	ldr	r2, [pc, #84]	; (d4a90 <_Z12dailyCleanupv+0x5c>)
 }
 
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags(Flag<TagT, ValueT> flag) :
         val_(flag.value()) {
-   d4a32:	781b      	ldrb	r3, [r3, #0]
-   d4a34:	4915      	ldr	r1, [pc, #84]	; (d4a8c <_Z12dailyCleanupv+0x60>)
-   d4a36:	4816      	ldr	r0, [pc, #88]	; (d4a90 <_Z12dailyCleanupv+0x64>)
+   d4a3a:	781b      	ldrb	r3, [r3, #0]
+   d4a3c:	4915      	ldr	r1, [pc, #84]	; (d4a94 <_Z12dailyCleanupv+0x60>)
+   d4a3e:	4816      	ldr	r0, [pc, #88]	; (d4a98 <_Z12dailyCleanupv+0x64>)
 }
 
 // particle::Flags<TagT, ValueT>
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags() :
         val_(0) {
-   d4a38:	2400      	movs	r4, #0
-   d4a3a:	f88d 4000 	strb.w	r4, [sp]
-   d4a3e:	f7ff fc4d 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
+   d4a40:	2400      	movs	r4, #0
+   d4a42:	f88d 4000 	strb.w	r4, [sp]
+   d4a46:	f7ff fc49 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
   sysStatus.verboseMode = false;
-   d4a42:	4b14      	ldr	r3, [pc, #80]	; (d4a94 <_Z12dailyCleanupv+0x68>)
-   d4a44:	711c      	strb	r4, [r3, #4]
+   d4a4a:	4b14      	ldr	r3, [pc, #80]	; (d4a9c <_Z12dailyCleanupv+0x68>)
+   d4a4c:	711c      	strb	r4, [r3, #4]
   Particle.syncTime();                                                // Set the clock each day
-   d4a46:	f7ff fbb7 	bl	d41b8 <_ZN10CloudClass8syncTimeEv.isra.11>
+   d4a4e:	f7ff fbb3 	bl	d41b8 <_ZN10CloudClass8syncTimeEv.isra.11>
     template<typename Condition> static bool waitCondition(Condition _condition) {
         return waitConditionWhile(_condition, []{ return true; });
     }
 
     template<typename Condition> static bool waitCondition(Condition _condition, system_tick_t timeout) {
         const system_tick_t start = millis();
-   d4a4a:	f7ff fc1c 	bl	d4286 <_ZN11SystemClass6millisEv>
+   d4a52:	f7ff fc18 	bl	d4286 <_ZN11SystemClass6millisEv>
 
 
     static uint32_t freeMemory();
 
     template<typename Condition, typename While> static bool waitConditionWhile(Condition _condition, While _while) {
         while (_while() && !_condition()) {
-   d4a4e:	2500      	movs	r5, #0
-   d4a50:	4604      	mov	r4, r0
-   d4a52:	f247 562f 	movw	r6, #29999	; 0x752f
-   d4a56:	2700      	movs	r7, #0
+   d4a56:	2500      	movs	r5, #0
+   d4a58:	4604      	mov	r4, r0
+   d4a5a:	f247 562f 	movw	r6, #29999	; 0x752f
+   d4a5e:	2700      	movs	r7, #0
         return waitConditionWhile(_condition, []{ return true; });
     }
 
     template<typename Condition> static bool waitCondition(Condition _condition, system_tick_t timeout) {
         const system_tick_t start = millis();
         return waitConditionWhile(_condition, [=]{ return (millis()-start)<timeout; });
-   d4a58:	f7ff fc15 	bl	d4286 <_ZN11SystemClass6millisEv>
+   d4a60:	f7ff fc11 	bl	d4286 <_ZN11SystemClass6millisEv>
 
 
     static uint32_t freeMemory();
 
     template<typename Condition, typename While> static bool waitConditionWhile(Condition _condition, While _while) {
         while (_while() && !_condition()) {
-   d4a5c:	1b00      	subs	r0, r0, r4
-   d4a5e:	eb61 0105 	sbc.w	r1, r1, r5
-   d4a62:	428f      	cmp	r7, r1
-   d4a64:	bf08      	it	eq
-   d4a66:	4286      	cmpeq	r6, r0
-   d4a68:	d305      	bcc.n	d4a76 <_Z12dailyCleanupv+0x4a>
+   d4a64:	1b00      	subs	r0, r0, r4
+   d4a66:	eb61 0105 	sbc.w	r1, r1, r5
+   d4a6a:	428f      	cmp	r7, r1
+   d4a6c:	bf08      	it	eq
+   d4a6e:	4286      	cmpeq	r6, r0
+   d4a70:	d305      	bcc.n	d4a7e <_Z12dailyCleanupv+0x4a>
   waitFor(Particle.syncTimeDone,30000);                               // Wait for up to 30 seconds for the SyncTime to complete
-   d4a6a:	f7ff fbaf 	bl	d41cc <_ZN10CloudClass12syncTimeDoneEv.isra.13>
-   d4a6e:	b910      	cbnz	r0, d4a76 <_Z12dailyCleanupv+0x4a>
+   d4a72:	f7ff fbab 	bl	d41cc <_ZN10CloudClass12syncTimeDoneEv.isra.13>
+   d4a76:	b910      	cbnz	r0, d4a7e <_Z12dailyCleanupv+0x4a>
             spark_process();
-   d4a70:	f003 fb92 	bl	d8198 <spark_process>
-   d4a74:	e7f0      	b.n	d4a58 <_Z12dailyCleanupv+0x2c>
-   d4a76:	f7ff fba9 	bl	d41cc <_ZN10CloudClass12syncTimeDoneEv.isra.13>
+   d4a78:	f003 fb8e 	bl	d8198 <spark_process>
+   d4a7c:	e7f0      	b.n	d4a60 <_Z12dailyCleanupv+0x2c>
+   d4a7e:	f7ff fba5 	bl	d41cc <_ZN10CloudClass12syncTimeDoneEv.isra.13>
   systemStatusWriteNeeded=true;
-   d4a7a:	4b07      	ldr	r3, [pc, #28]	; (d4a98 <_Z12dailyCleanupv+0x6c>)
-   d4a7c:	2201      	movs	r2, #1
-   d4a7e:	701a      	strb	r2, [r3, #0]
+   d4a82:	4b07      	ldr	r3, [pc, #28]	; (d4aa0 <_Z12dailyCleanupv+0x6c>)
+   d4a84:	2201      	movs	r2, #1
+   d4a86:	701a      	strb	r2, [r3, #0]
 }
-   d4a80:	b003      	add	sp, #12
-   d4a82:	bdf0      	pop	{r4, r5, r6, r7, pc}
-   d4a84:	2003df0c 	.word	0x2003df0c
-   d4a88:	000dcc03 	.word	0x000dcc03
-   d4a8c:	000dcc0b 	.word	0x000dcc0b
-   d4a90:	2003deac 	.word	0x2003deac
-   d4a94:	2003e04c 	.word	0x2003e04c
-   d4a98:	2003df58 	.word	0x2003df58
+   d4a88:	b003      	add	sp, #12
+   d4a8a:	bdf0      	pop	{r4, r5, r6, r7, pc}
+   d4a8c:	2003df0c 	.word	0x2003df0c
+   d4a90:	000dcc03 	.word	0x000dcc03
+   d4a94:	000dcc0b 	.word	0x000dcc0b
+   d4a98:	2003deac 	.word	0x2003deac
+   d4a9c:	2003e04c 	.word	0x2003e04c
+   d4aa0:	2003df58 	.word	0x2003df58
 
-000d4a9c <_Z8isDSTusav>:
+000d4aa4 <_Z8isDSTusav>:
     publishQueue.publish("Interval", data, PRIVATE);
   }
   return 1;
 }
 
 bool isDSTusa() {
-   d4a9c:	b538      	push	{r3, r4, r5, lr}
+   d4aa4:	b538      	push	{r3, r4, r5, lr}
   // United States of America Summer Timer calculation (2am Local Time - 2nd Sunday in March/ 1st Sunday in November)
   // Adapted from @ScruffR's code posted here https://community.particle.io/t/daylight-savings-problem/38424/4
   // The code works in from months, days and hours in succession toward the two transitions
   int dayOfMonth = Time.day();
-   d4a9e:	f005 f8c1 	bl	d9c24 <_ZN9TimeClass3dayEv>
-   d4aa2:	4605      	mov	r5, r0
+   d4aa6:	f005 f8bd 	bl	d9c24 <_ZN9TimeClass3dayEv>
+   d4aaa:	4605      	mov	r5, r0
   int month = Time.month();
-   d4aa4:	f005 f8cf 	bl	d9c46 <_ZN9TimeClass5monthEv>
-   d4aa8:	4604      	mov	r4, r0
+   d4aac:	f005 f8cb 	bl	d9c46 <_ZN9TimeClass5monthEv>
+   d4ab0:	4604      	mov	r4, r0
   int dayOfWeek = Time.weekday() - 1; // make Sunday 0 .. Saturday 6
-   d4aaa:	f005 f8c5 	bl	d9c38 <_ZN9TimeClass7weekdayEv>
+   d4ab2:	f005 f8c1 	bl	d9c38 <_ZN9TimeClass7weekdayEv>
 
   // By Month - inside or outside the DST window
   if (month >= 4 && month <= 10)
-   d4aae:	1f23      	subs	r3, r4, #4
-   d4ab0:	2b06      	cmp	r3, #6
-   d4ab2:	d90e      	bls.n	d4ad2 <_Z8isDSTusav+0x36>
+   d4ab6:	1f23      	subs	r3, r4, #4
+   d4ab8:	2b06      	cmp	r3, #6
+   d4aba:	d90e      	bls.n	d4ada <_Z8isDSTusav+0x36>
   { // April to October definetly DST
     return true;
   }
   else if (month < 3 || month > 11)
-   d4ab4:	1ee3      	subs	r3, r4, #3
-   d4ab6:	2b08      	cmp	r3, #8
-   d4ab8:	d80d      	bhi.n	d4ad6 <_Z8isDSTusav+0x3a>
+   d4abc:	1ee3      	subs	r3, r4, #3
+   d4abe:	2b08      	cmp	r3, #8
+   d4ac0:	d80d      	bhi.n	d4ade <_Z8isDSTusav+0x3a>
   { // before March or after October is definetly standard time
     return false;
   }
 
   boolean beforeFirstSunday = (dayOfMonth - dayOfWeek < 0);
-   d4aba:	3801      	subs	r0, #1
+   d4ac2:	3801      	subs	r0, #1
   boolean secondSundayOrAfter = (dayOfMonth - dayOfWeek > 7);
 
   if (beforeFirstSunday && !secondSundayOrAfter) return (month == 11);
-   d4abc:	1a2d      	subs	r5, r5, r0
-   d4abe:	d501      	bpl.n	d4ac4 <_Z8isDSTusav+0x28>
-   d4ac0:	2c0b      	cmp	r4, #11
-   d4ac2:	e002      	b.n	d4aca <_Z8isDSTusav+0x2e>
+   d4ac4:	1a2d      	subs	r5, r5, r0
+   d4ac6:	d501      	bpl.n	d4acc <_Z8isDSTusav+0x28>
+   d4ac8:	2c0b      	cmp	r4, #11
+   d4aca:	e002      	b.n	d4ad2 <_Z8isDSTusav+0x2e>
   else if (!beforeFirstSunday && !secondSundayOrAfter) return false;
-   d4ac4:	2d07      	cmp	r5, #7
-   d4ac6:	dd06      	ble.n	d4ad6 <_Z8isDSTusav+0x3a>
+   d4acc:	2d07      	cmp	r5, #7
+   d4ace:	dd06      	ble.n	d4ade <_Z8isDSTusav+0x3a>
   else if (!beforeFirstSunday && secondSundayOrAfter) return (month == 3);
-   d4ac8:	2c03      	cmp	r4, #3
-   d4aca:	bf14      	ite	ne
-   d4acc:	2000      	movne	r0, #0
-   d4ace:	2001      	moveq	r0, #1
-   d4ad0:	bd38      	pop	{r3, r4, r5, pc}
+   d4ad0:	2c03      	cmp	r4, #3
+   d4ad2:	bf14      	ite	ne
+   d4ad4:	2000      	movne	r0, #0
+   d4ad6:	2001      	moveq	r0, #1
+   d4ad8:	bd38      	pop	{r3, r4, r5, pc}
   int dayOfWeek = Time.weekday() - 1; // make Sunday 0 .. Saturday 6
 
   // By Month - inside or outside the DST window
   if (month >= 4 && month <= 10)
   { // April to October definetly DST
     return true;
-   d4ad2:	2001      	movs	r0, #1
-   d4ad4:	bd38      	pop	{r3, r4, r5, pc}
+   d4ada:	2001      	movs	r0, #1
+   d4adc:	bd38      	pop	{r3, r4, r5, pc}
   }
   else if (month < 3 || month > 11)
   { // before March or after October is definetly standard time
     return false;
-   d4ad6:	2000      	movs	r0, #0
+   d4ade:	2000      	movs	r0, #0
   if (secSinceMidnightLocal >= 2*3600)
   { //  In the US, Daylight Time is based on local time
     return !dayStartedAs;
   }
   return dayStartedAs;
 }
-   d4ad8:	bd38      	pop	{r3, r4, r5, pc}
-   d4ada:	0000      	movs	r0, r0
-   d4adc:	0000      	movs	r0, r0
+   d4ae0:	bd38      	pop	{r3, r4, r5, pc}
+   d4ae2:	0000      	movs	r0, r0
+   d4ae4:	0000      	movs	r0, r0
 	...
 
-000d4ae0 <_Z12setDSTOffset6String>:
+000d4ae8 <_Z12setDSTOffset6String>:
   Particle.syncTime();                                                // Set the clock each day
   waitFor(Particle.syncTimeDone,30000);                               // Wait for up to 30 seconds for the SyncTime to complete
   systemStatusWriteNeeded=true;
 }
 
 int setDSTOffset(String command) {                                      // This is the number of hours that will be added for Daylight Savings Time 0 (off) - 2
-   d4ae0:	b570      	push	{r4, r5, r6, lr}
-   d4ae2:	ed2d 8b02 	vpush	{d8}
-   d4ae6:	b0ca      	sub	sp, #296	; 0x128
-   d4ae8:	4604      	mov	r4, r0
+   d4ae8:	b570      	push	{r4, r5, r6, lr}
+   d4aea:	ed2d 8b02 	vpush	{d8}
+   d4aee:	b0ca      	sub	sp, #296	; 0x128
+   d4af0:	4604      	mov	r4, r0
   char * pEND;
   char data[256];
   time_t t = Time.now();
-   d4aea:	f005 f880 	bl	d9bee <_ZN9TimeClass3nowEv>
+   d4af2:	f005 f87c 	bl	d9bee <_ZN9TimeClass3nowEv>
   int8_t tempDSTOffset = strtol(command,&pEND,10);                      // Looks for the first integer and interprets it
-   d4aee:	220a      	movs	r2, #10
+   d4af6:	220a      	movs	r2, #10
 }
 
 int setDSTOffset(String command) {                                      // This is the number of hours that will be added for Daylight Savings Time 0 (off) - 2
   char * pEND;
   char data[256];
   time_t t = Time.now();
-   d4af0:	4606      	mov	r6, r0
+   d4af8:	4606      	mov	r6, r0
   int8_t tempDSTOffset = strtol(command,&pEND,10);                      // Looks for the first integer and interprets it
-   d4af2:	a905      	add	r1, sp, #20
-   d4af4:	6820      	ldr	r0, [r4, #0]
-   d4af6:	f007 fc1b 	bl	dc330 <strtol>
+   d4afa:	a905      	add	r1, sp, #20
+   d4afc:	6820      	ldr	r0, [r4, #0]
+   d4afe:	f007 fc17 	bl	dc330 <strtol>
   if ((tempDSTOffset < 0) | (tempDSTOffset > 2)) return 0;              // Make sure it falls in a valid range or send a "fail" result
-   d4afa:	b2c3      	uxtb	r3, r0
-   d4afc:	2b02      	cmp	r3, #2
-   d4afe:	d858      	bhi.n	d4bb2 <_Z12setDSTOffset6String+0xd2>
+   d4b02:	b2c3      	uxtb	r3, r0
+   d4b04:	2b02      	cmp	r3, #2
+   d4b06:	d858      	bhi.n	d4bba <_Z12setDSTOffset6String+0xd2>
   Time.setDSTOffset((float)tempDSTOffset);                              // Set the DST Offset
-   d4b00:	b240      	sxtb	r0, r0
-   d4b02:	ee07 0a90 	vmov	s15, r0
-   d4b06:	eeb8 8ae7 	vcvt.f32.s32	s16, s15
-   d4b0a:	eeb0 0a48 	vmov.f32	s0, s16
-   d4b0e:	f004 ff63 	bl	d99d8 <_ZN9TimeClass12setDSTOffsetEf>
+   d4b08:	b240      	sxtb	r0, r0
+   d4b0a:	ee07 0a90 	vmov	s15, r0
+   d4b0e:	eeb8 8ae7 	vcvt.f32.s32	s16, s15
+   d4b12:	eeb0 0a48 	vmov.f32	s0, s16
+   d4b16:	f004 ff5f 	bl	d99d8 <_ZN9TimeClass12setDSTOffsetEf>
   sysStatus.dstOffset = (float)tempDSTOffset;
-   d4b12:	4b2d      	ldr	r3, [pc, #180]	; (d4bc8 <_Z12setDSTOffset6String+0xe8>)
-   d4b14:	ed83 8a06 	vstr	s16, [r3, #24]
+   d4b1a:	4b2d      	ldr	r3, [pc, #180]	; (d4bd0 <_Z12setDSTOffset6String+0xe8>)
+   d4b1c:	ed83 8a06 	vstr	s16, [r3, #24]
   systemStatusWriteNeeded = true;
-   d4b18:	4b2c      	ldr	r3, [pc, #176]	; (d4bcc <_Z12setDSTOffset6String+0xec>)
-   d4b1a:	2201      	movs	r2, #1
-   d4b1c:	701a      	strb	r2, [r3, #0]
+   d4b20:	4b2c      	ldr	r3, [pc, #176]	; (d4bd4 <_Z12setDSTOffset6String+0xec>)
+   d4b22:	2201      	movs	r2, #1
+   d4b24:	701a      	strb	r2, [r3, #0]
   snprintf(data, sizeof(data), "DST offset %2.1f",sysStatus.dstOffset);
-   d4b1e:	ee18 0a10 	vmov	r0, s16
-   d4b22:	f005 fdd9 	bl	da6d8 <__aeabi_f2d>
-   d4b26:	4a2a      	ldr	r2, [pc, #168]	; (d4bd0 <_Z12setDSTOffset6String+0xf0>)
-   d4b28:	e9cd 0100 	strd	r0, r1, [sp]
-   d4b2c:	f44f 7180 	mov.w	r1, #256	; 0x100
-   d4b30:	a80a      	add	r0, sp, #40	; 0x28
-   d4b32:	f003 fc01 	bl	d8338 <snprintf>
+   d4b26:	ee18 0a10 	vmov	r0, s16
+   d4b2a:	f005 fdd5 	bl	da6d8 <__aeabi_f2d>
+   d4b2e:	4a2a      	ldr	r2, [pc, #168]	; (d4bd8 <_Z12setDSTOffset6String+0xf0>)
+   d4b30:	e9cd 0100 	strd	r0, r1, [sp]
+   d4b34:	f44f 7180 	mov.w	r1, #256	; 0x100
+   d4b38:	a80a      	add	r0, sp, #40	; 0x28
+   d4b3a:	f003 fbfd 	bl	d8338 <snprintf>
   if (Time.isValid()) isDSTusa() ? Time.beginDST() : Time.endDST();     // Perform the DST calculation here
-   d4b36:	f005 f839 	bl	d9bac <_ZN9TimeClass7isValidEv>
-   d4b3a:	b138      	cbz	r0, d4b4c <_Z12setDSTOffset6String+0x6c>
-   d4b3c:	f7ff ffae 	bl	d4a9c <_Z8isDSTusav>
-   d4b40:	b110      	cbz	r0, d4b48 <_Z12setDSTOffset6String+0x68>
-   d4b42:	f004 ff63 	bl	d9a0c <_ZN9TimeClass8beginDSTEv>
-   d4b46:	e001      	b.n	d4b4c <_Z12setDSTOffset6String+0x6c>
-   d4b48:	f004 ff6a 	bl	d9a20 <_ZN9TimeClass6endDSTEv>
+   d4b3e:	f005 f835 	bl	d9bac <_ZN9TimeClass7isValidEv>
+   d4b42:	b138      	cbz	r0, d4b54 <_Z12setDSTOffset6String+0x6c>
+   d4b44:	f7ff ffae 	bl	d4aa4 <_Z8isDSTusav>
+   d4b48:	b110      	cbz	r0, d4b50 <_Z12setDSTOffset6String+0x68>
+   d4b4a:	f004 ff5f 	bl	d9a0c <_ZN9TimeClass8beginDSTEv>
+   d4b4e:	e001      	b.n	d4b54 <_Z12setDSTOffset6String+0x6c>
+   d4b50:	f004 ff66 	bl	d9a20 <_ZN9TimeClass6endDSTEv>
   snprintf(currentOffsetStr,sizeof(currentOffsetStr),"%2.1f UTC",(Time.local() - Time.now()) / 3600.0);
-   d4b4c:	f004 ff1a 	bl	d9984 <_ZN9TimeClass5localEv>
-   d4b50:	4604      	mov	r4, r0
-   d4b52:	f005 f84c 	bl	d9bee <_ZN9TimeClass3nowEv>
-   d4b56:	1a20      	subs	r0, r4, r0
-   d4b58:	f005 fdac 	bl	da6b4 <__aeabi_i2d>
-   d4b5c:	a318      	add	r3, pc, #96	; (adr r3, d4bc0 <_Z12setDSTOffset6String+0xe0>)
-   d4b5e:	e9d3 2300 	ldrd	r2, r3, [r3]
-   d4b62:	f005 ff37 	bl	da9d4 <__aeabi_ddiv>
-   d4b66:	4a1b      	ldr	r2, [pc, #108]	; (d4bd4 <_Z12setDSTOffset6String+0xf4>)
-   d4b68:	e9cd 0100 	strd	r0, r1, [sp]
-   d4b6c:	210a      	movs	r1, #10
-   d4b6e:	481a      	ldr	r0, [pc, #104]	; (d4bd8 <_Z12setDSTOffset6String+0xf8>)
-   d4b70:	f003 fbe2 	bl	d8338 <snprintf>
-   d4b74:	f003 fb28 	bl	d81c8 <spark_cloud_flag_connected>
+   d4b54:	f004 ff16 	bl	d9984 <_ZN9TimeClass5localEv>
+   d4b58:	4604      	mov	r4, r0
+   d4b5a:	f005 f848 	bl	d9bee <_ZN9TimeClass3nowEv>
+   d4b5e:	1a20      	subs	r0, r4, r0
+   d4b60:	f005 fda8 	bl	da6b4 <__aeabi_i2d>
+   d4b64:	a318      	add	r3, pc, #96	; (adr r3, d4bc8 <_Z12setDSTOffset6String+0xe0>)
+   d4b66:	e9d3 2300 	ldrd	r2, r3, [r3]
+   d4b6a:	f005 ff33 	bl	da9d4 <__aeabi_ddiv>
+   d4b6e:	4a1b      	ldr	r2, [pc, #108]	; (d4bdc <_Z12setDSTOffset6String+0xf4>)
+   d4b70:	e9cd 0100 	strd	r0, r1, [sp]
+   d4b74:	210a      	movs	r1, #10
+   d4b76:	481a      	ldr	r0, [pc, #104]	; (d4be0 <_Z12setDSTOffset6String+0xf8>)
+   d4b78:	f003 fbde 	bl	d8338 <snprintf>
+   d4b7c:	f003 fb24 	bl	d81c8 <spark_cloud_flag_connected>
   if (Particle.connected()) {
-   d4b78:	b1e8      	cbz	r0, d4bb6 <_Z12setDSTOffset6String+0xd6>
-   d4b7a:	4d18      	ldr	r5, [pc, #96]	; (d4bdc <_Z12setDSTOffset6String+0xfc>)
+   d4b80:	b1e8      	cbz	r0, d4bbe <_Z12setDSTOffset6String+0xd6>
+   d4b82:	4d18      	ldr	r5, [pc, #96]	; (d4be4 <_Z12setDSTOffset6String+0xfc>)
     publishQueue.publish("Time",data, PRIVATE);
-   d4b7c:	4918      	ldr	r1, [pc, #96]	; (d4be0 <_Z12setDSTOffset6String+0x100>)
+   d4b84:	4918      	ldr	r1, [pc, #96]	; (d4be8 <_Z12setDSTOffset6String+0x100>)
 }
 
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags(Flag<TagT, ValueT> flag) :
         val_(flag.value()) {
-   d4b7e:	782b      	ldrb	r3, [r5, #0]
-   d4b80:	4818      	ldr	r0, [pc, #96]	; (d4be4 <_Z12setDSTOffset6String+0x104>)
+   d4b86:	782b      	ldrb	r3, [r5, #0]
+   d4b88:	4818      	ldr	r0, [pc, #96]	; (d4bec <_Z12setDSTOffset6String+0x104>)
 }
 
 // particle::Flags<TagT, ValueT>
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags() :
         val_(0) {
-   d4b82:	2400      	movs	r4, #0
-   d4b84:	aa0a      	add	r2, sp, #40	; 0x28
-   d4b86:	f88d 4000 	strb.w	r4, [sp]
-   d4b8a:	f7ff fba7 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
+   d4b8a:	2400      	movs	r4, #0
+   d4b8c:	aa0a      	add	r2, sp, #40	; 0x28
+   d4b8e:	f88d 4000 	strb.w	r4, [sp]
+   d4b92:	f7ff fba3 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
     publishQueue.publish("Time",Time.timeStr(t), PRIVATE);
-   d4b8e:	4631      	mov	r1, r6
-   d4b90:	a806      	add	r0, sp, #24
-   d4b92:	f004 ff55 	bl	d9a40 <_ZN9TimeClass7timeStrEl>
-   d4b96:	9b06      	ldr	r3, [sp, #24]
-   d4b98:	9303      	str	r3, [sp, #12]
-   d4b9a:	f88d 4000 	strb.w	r4, [sp]
+   d4b96:	4631      	mov	r1, r6
+   d4b98:	a806      	add	r0, sp, #24
+   d4b9a:	f004 ff51 	bl	d9a40 <_ZN9TimeClass7timeStrEl>
+   d4b9e:	9b06      	ldr	r3, [sp, #24]
+   d4ba0:	9303      	str	r3, [sp, #12]
+   d4ba2:	f88d 4000 	strb.w	r4, [sp]
 }
 
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags(Flag<TagT, ValueT> flag) :
         val_(flag.value()) {
-   d4b9e:	782b      	ldrb	r3, [r5, #0]
-   d4ba0:	9a03      	ldr	r2, [sp, #12]
-   d4ba2:	490f      	ldr	r1, [pc, #60]	; (d4be0 <_Z12setDSTOffset6String+0x100>)
-   d4ba4:	480f      	ldr	r0, [pc, #60]	; (d4be4 <_Z12setDSTOffset6String+0x104>)
-   d4ba6:	f7ff fb99 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
-   d4baa:	a806      	add	r0, sp, #24
-   d4bac:	f004 fd71 	bl	d9692 <_ZN6StringD1Ev>
-   d4bb0:	e001      	b.n	d4bb6 <_Z12setDSTOffset6String+0xd6>
+   d4ba6:	782b      	ldrb	r3, [r5, #0]
+   d4ba8:	9a03      	ldr	r2, [sp, #12]
+   d4baa:	490f      	ldr	r1, [pc, #60]	; (d4be8 <_Z12setDSTOffset6String+0x100>)
+   d4bac:	480f      	ldr	r0, [pc, #60]	; (d4bec <_Z12setDSTOffset6String+0x104>)
+   d4bae:	f7ff fb95 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
+   d4bb2:	a806      	add	r0, sp, #24
+   d4bb4:	f004 fd6d 	bl	d9692 <_ZN6StringD1Ev>
+   d4bb8:	e001      	b.n	d4bbe <_Z12setDSTOffset6String+0xd6>
 int setDSTOffset(String command) {                                      // This is the number of hours that will be added for Daylight Savings Time 0 (off) - 2
   char * pEND;
   char data[256];
   time_t t = Time.now();
   int8_t tempDSTOffset = strtol(command,&pEND,10);                      // Looks for the first integer and interprets it
   if ((tempDSTOffset < 0) | (tempDSTOffset > 2)) return 0;              // Make sure it falls in a valid range or send a "fail" result
-   d4bb2:	2000      	movs	r0, #0
-   d4bb4:	e000      	b.n	d4bb8 <_Z12setDSTOffset6String+0xd8>
+   d4bba:	2000      	movs	r0, #0
+   d4bbc:	e000      	b.n	d4bc0 <_Z12setDSTOffset6String+0xd8>
   snprintf(currentOffsetStr,sizeof(currentOffsetStr),"%2.1f UTC",(Time.local() - Time.now()) / 3600.0);
   if (Particle.connected()) {
     publishQueue.publish("Time",data, PRIVATE);
     publishQueue.publish("Time",Time.timeStr(t), PRIVATE);
   }
   return 1;
-   d4bb6:	2001      	movs	r0, #1
+   d4bbe:	2001      	movs	r0, #1
 }
-   d4bb8:	b04a      	add	sp, #296	; 0x128
-   d4bba:	ecbd 8b02 	vpop	{d8}
-   d4bbe:	bd70      	pop	{r4, r5, r6, pc}
-   d4bc0:	00000000 	.word	0x00000000
-   d4bc4:	40ac2000 	.word	0x40ac2000
-   d4bc8:	2003e04c 	.word	0x2003e04c
-   d4bcc:	2003df58 	.word	0x2003df58
-   d4bd0:	000dcc19 	.word	0x000dcc19
-   d4bd4:	000dcac4 	.word	0x000dcac4
-   d4bd8:	2003dee4 	.word	0x2003dee4
-   d4bdc:	2003df0c 	.word	0x2003df0c
-   d4be0:	000dcae2 	.word	0x000dcae2
-   d4be4:	2003deac 	.word	0x2003deac
+   d4bc0:	b04a      	add	sp, #296	; 0x128
+   d4bc2:	ecbd 8b02 	vpop	{d8}
+   d4bc6:	bd70      	pop	{r4, r5, r6, pc}
+   d4bc8:	00000000 	.word	0x00000000
+   d4bcc:	40ac2000 	.word	0x40ac2000
+   d4bd0:	2003e04c 	.word	0x2003e04c
+   d4bd4:	2003df58 	.word	0x2003df58
+   d4bd8:	000dcc19 	.word	0x000dcc19
+   d4bdc:	000dcac4 	.word	0x000dcac4
+   d4be0:	2003dee4 	.word	0x2003dee4
+   d4be4:	2003df0c 	.word	0x2003df0c
+   d4be8:	000dcae2 	.word	0x000dcae2
+   d4bec:	2003deac 	.word	0x2003deac
 
-000d4be8 <_Z11displayInfov>:
+000d4bf0 <_Z11displayInfov>:
   }
   return dayStartedAs;
 }
 
 void displayInfo()
 {
-   d4be8:	e92d 41f0 	stmdb	sp!, {r4, r5, r6, r7, r8, lr}
+   d4bf0:	e92d 41f0 	stmdb	sp!, {r4, r5, r6, r7, r8, lr}
 	if (millis() - lastSerial >= SERIAL_PERIOD) {
-   d4bec:	4c69      	ldr	r4, [pc, #420]	; (d4d94 <_Z11displayInfov+0x1ac>)
+   d4bf4:	4c69      	ldr	r4, [pc, #420]	; (d4d9c <_Z11displayInfov+0x1ac>)
   }
   return dayStartedAs;
 }
 
 void displayInfo()
 {
-   d4bee:	b0ac      	sub	sp, #176	; 0xb0
-   d4bf0:	f003 f88a 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d4bf6:	b0ac      	sub	sp, #176	; 0xb0
+   d4bf8:	f003 f886 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
 	if (millis() - lastSerial >= SERIAL_PERIOD) {
-   d4bf4:	6823      	ldr	r3, [r4, #0]
-   d4bf6:	1ac0      	subs	r0, r0, r3
-   d4bf8:	f241 3387 	movw	r3, #4999	; 0x1387
-   d4bfc:	4298      	cmp	r0, r3
-   d4bfe:	f240 80c6 	bls.w	d4d8e <_Z11displayInfov+0x1a6>
-   d4c02:	f003 f881 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d4bfc:	6823      	ldr	r3, [r4, #0]
+   d4bfe:	1ac0      	subs	r0, r0, r3
+   d4c00:	f241 3387 	movw	r3, #4999	; 0x1387
+   d4c04:	4298      	cmp	r0, r3
+   d4c06:	f240 80c6 	bls.w	d4d96 <_Z11displayInfov+0x1a6>
+   d4c0a:	f003 f87d 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
 		lastSerial = millis();
-   d4c06:	6020      	str	r0, [r4, #0]
-   d4c08:	4c63      	ldr	r4, [pc, #396]	; (d4d98 <_Z11displayInfov+0x1b0>)
+   d4c0e:	6020      	str	r0, [r4, #0]
+   d4c10:	4c63      	ldr	r4, [pc, #396]	; (d4da0 <_Z11displayInfov+0x1b0>)
 typedef std::function<os_thread_return_t(void)> wiring_thread_fn_t;
 
 class SingleThreadedSection {
 public:
     SingleThreadedSection() {
         os_thread_scheduling(false, NULL);
-   d4c0a:	2100      	movs	r1, #0
-   d4c0c:	6865      	ldr	r5, [r4, #4]
-   d4c0e:	4608      	mov	r0, r1
-   d4c10:	f003 f812 	bl	d7c38 <os_thread_scheduling>
-   d4c14:	f895 8000 	ldrb.w	r8, [r5]
-   d4c18:	6b6e      	ldr	r6, [r5, #52]	; 0x34
-   d4c1a:	4d60      	ldr	r5, [pc, #384]	; (d4d9c <_Z11displayInfov+0x1b4>)
+   d4c12:	2100      	movs	r1, #0
+   d4c14:	6865      	ldr	r5, [r4, #4]
+   d4c16:	4608      	mov	r0, r1
+   d4c18:	f003 f80e 	bl	d7c38 <os_thread_scheduling>
+   d4c1c:	f895 8000 	ldrb.w	r8, [r5]
+   d4c20:	6b6e      	ldr	r6, [r5, #52]	; 0x34
+   d4c22:	4d60      	ldr	r5, [pc, #384]	; (d4da4 <_Z11displayInfov+0x1b4>)
     }
 
     ~SingleThreadedSection() {
         os_thread_scheduling(true, NULL);
-   d4c1c:	2100      	movs	r1, #0
-   d4c1e:	2001      	movs	r0, #1
-   d4c20:	f003 f80a 	bl	d7c38 <os_thread_scheduling>
-   d4c24:	4627      	mov	r7, r4
+   d4c24:	2100      	movs	r1, #0
+   d4c26:	2001      	movs	r0, #1
+   d4c28:	f003 f806 	bl	d7c38 <os_thread_scheduling>
+   d4c2c:	4627      	mov	r7, r4
 	 * Note: It may take 10 seconds for for this to go to false after losing GPS signal.
 	 */
 	bool gpsFix(void) const {
 		TinyGPSLocation location = gpsData.getLocation();
 
 		return location.isValid() && location.age() < MAX_GPS_AGE_MS;
-   d4c26:	f1b8 0f00 	cmp.w	r8, #0
-   d4c2a:	d070      	beq.n	d4d0e <_Z11displayInfov+0x126>
-   d4c2c:	f003 f86c 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d4c2e:	f1b8 0f00 	cmp.w	r8, #0
+   d4c32:	d070      	beq.n	d4d16 <_Z11displayInfov+0x126>
+   d4c34:	f003 f868 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
 
 		char buf[128];
 		if (t.gpsFix()) {
-   d4c30:	f242 730f 	movw	r3, #9999	; 0x270f
-   d4c34:	1b80      	subs	r0, r0, r6
-   d4c36:	4298      	cmp	r0, r3
-   d4c38:	d869      	bhi.n	d4d0e <_Z11displayInfov+0x126>
+   d4c38:	f242 730f 	movw	r3, #9999	; 0x270f
+   d4c3c:	1b80      	subs	r0, r0, r6
+   d4c3e:	4298      	cmp	r0, r3
+   d4c40:	d869      	bhi.n	d4d16 <_Z11displayInfov+0x126>
       current.latitude = t.readLatDeg();
-   d4c3a:	6860      	ldr	r0, [r4, #4]
-   d4c3c:	4e58      	ldr	r6, [pc, #352]	; (d4da0 <_Z11displayInfov+0x1b8>)
-   d4c3e:	f7ff fae0 	bl	d4202 <_ZNK13LegacyAdapter10readLatDegEv.isra.23>
-   d4c42:	ee10 0a10 	vmov	r0, s0
-   d4c46:	f005 fd47 	bl	da6d8 <__aeabi_f2d>
-   d4c4a:	e9c6 0108 	strd	r0, r1, [r6, #32]
+   d4c42:	6860      	ldr	r0, [r4, #4]
+   d4c44:	4e58      	ldr	r6, [pc, #352]	; (d4da8 <_Z11displayInfov+0x1b8>)
+   d4c46:	f7ff fadc 	bl	d4202 <_ZNK13LegacyAdapter10readLatDegEv.isra.23>
+   d4c4a:	ee10 0a10 	vmov	r0, s0
+   d4c4e:	f005 fd43 	bl	da6d8 <__aeabi_f2d>
+   d4c52:	e9c6 0108 	strd	r0, r1, [r6, #32]
       current.longitude = t.readLonDeg();
-   d4c4e:	6860      	ldr	r0, [r4, #4]
-   d4c50:	f7ff faf8 	bl	d4244 <_ZNK13LegacyAdapter10readLonDegEv.isra.24>
-   d4c54:	ee10 0a10 	vmov	r0, s0
-   d4c58:	f005 fd3e 	bl	da6d8 <__aeabi_f2d>
-   d4c5c:	e9c6 010a 	strd	r0, r1, [r6, #40]	; 0x28
+   d4c56:	6860      	ldr	r0, [r4, #4]
+   d4c58:	f7ff faf4 	bl	d4244 <_ZNK13LegacyAdapter10readLonDegEv.isra.24>
+   d4c5c:	ee10 0a10 	vmov	r0, s0
+   d4c60:	f005 fd3a 	bl	da6d8 <__aeabi_f2d>
+   d4c64:	e9c6 010a 	strd	r0, r1, [r6, #40]	; 0x28
 			snprintf(buf, sizeof(buf), "location:%f,%f altitude:%f satellites:%d hdop:%l", t.readLatDeg(), t.readLonDeg(), t.getAltitude(), t.getSatellites(), t.getTinyGPSPlus()->getHDOP().value());
-   d4c60:	6860      	ldr	r0, [r4, #4]
-   d4c62:	f7ff face 	bl	d4202 <_ZNK13LegacyAdapter10readLatDegEv.isra.23>
-   d4c66:	6860      	ldr	r0, [r4, #4]
-   d4c68:	ee10 6a10 	vmov	r6, s0
-   d4c6c:	f7ff faea 	bl	d4244 <_ZNK13LegacyAdapter10readLonDegEv.isra.24>
+   d4c68:	6860      	ldr	r0, [r4, #4]
+   d4c6a:	f7ff faca 	bl	d4202 <_ZNK13LegacyAdapter10readLatDegEv.isra.23>
+   d4c6e:	6860      	ldr	r0, [r4, #4]
+   d4c70:	ee10 6a10 	vmov	r6, s0
+   d4c74:	f7ff fae6 	bl	d4244 <_ZNK13LegacyAdapter10readLonDegEv.isra.24>
 typedef std::function<os_thread_return_t(void)> wiring_thread_fn_t;
 
 class SingleThreadedSection {
 public:
     SingleThreadedSection() {
         os_thread_scheduling(false, NULL);
-   d4c70:	2100      	movs	r1, #0
-   d4c72:	6867      	ldr	r7, [r4, #4]
-   d4c74:	ed8d 0a09 	vstr	s0, [sp, #36]	; 0x24
-   d4c78:	4608      	mov	r0, r1
-   d4c7a:	f002 ffdd 	bl	d7c38 <os_thread_scheduling>
+   d4c78:	2100      	movs	r1, #0
+   d4c7a:	6867      	ldr	r7, [r4, #4]
+   d4c7c:	ed8d 0a09 	vstr	s0, [sp, #36]	; 0x24
+   d4c80:	4608      	mov	r0, r1
+   d4c82:	f002 ffd9 	bl	d7c38 <os_thread_scheduling>
     }
 
     ~SingleThreadedSection() {
         os_thread_scheduling(true, NULL);
-   d4c7e:	2100      	movs	r1, #0
-   d4c80:	2001      	movs	r0, #1
+   d4c86:	2100      	movs	r1, #0
+   d4c88:	2001      	movs	r0, #1
 	/**
 	 * @brief Get the altitude
 	 */
 	TinyGPSAltitude getAltitude() const {
 	    SINGLE_THREADED_BLOCK() {
 	    	return altitude;
-   d4c82:	f8d7 7080 	ldr.w	r7, [r7, #128]	; 0x80
-   d4c86:	f002 ffd7 	bl	d7c38 <os_thread_scheduling>
-   d4c8a:	6860      	ldr	r0, [r4, #4]
-   d4c8c:	f7ff faab 	bl	d41e6 <_ZNK13LegacyAdapter13getSatellitesEv.isra.26>
-   d4c90:	4680      	mov	r8, r0
-   d4c92:	4620      	mov	r0, r4
-   d4c94:	f002 faba 	bl	d720c <_ZN12AssetTracker14getTinyGPSPlusEv>
+   d4c8a:	f8d7 7080 	ldr.w	r7, [r7, #128]	; 0x80
+   d4c8e:	f002 ffd3 	bl	d7c38 <os_thread_scheduling>
+   d4c92:	6860      	ldr	r0, [r4, #4]
+   d4c94:	f7ff faa7 	bl	d41e6 <_ZNK13LegacyAdapter13getSatellitesEv.isra.26>
+   d4c98:	4680      	mov	r8, r0
+   d4c9a:	4620      	mov	r0, r4
+   d4c9c:	f002 fab6 	bl	d720c <_ZN12AssetTracker14getTinyGPSPlusEv>
 typedef std::function<os_thread_return_t(void)> wiring_thread_fn_t;
 
 class SingleThreadedSection {
 public:
     SingleThreadedSection() {
         os_thread_scheduling(false, NULL);
-   d4c98:	2100      	movs	r1, #0
-   d4c9a:	4604      	mov	r4, r0
-   d4c9c:	4608      	mov	r0, r1
-   d4c9e:	f002 ffcb 	bl	d7c38 <os_thread_scheduling>
+   d4ca0:	2100      	movs	r1, #0
+   d4ca2:	4604      	mov	r4, r0
+   d4ca4:	4608      	mov	r0, r1
+   d4ca6:	f002 ffc7 	bl	d7c38 <os_thread_scheduling>
     }
 
     ~SingleThreadedSection() {
         os_thread_scheduling(true, NULL);
-   d4ca2:	2100      	movs	r1, #0
-   d4ca4:	2001      	movs	r0, #1
+   d4caa:	2100      	movs	r1, #0
+   d4cac:	2001      	movs	r0, #1
      * configuration in the sky. HDOP is a factor in determining the relative accuracy of a horizontal position.
      * The smaller the DOP number, the better the geometry.
 	 */
 	TinyGPSDecimal getHDOP() const {
 	    SINGLE_THREADED_BLOCK() {
 	    	return hdop;
-   d4ca6:	f8d4 40b0 	ldr.w	r4, [r4, #176]	; 0xb0
-   d4caa:	f002 ffc5 	bl	d7c38 <os_thread_scheduling>
-   d4cae:	4638      	mov	r0, r7
-   d4cb0:	9407      	str	r4, [sp, #28]
-   d4cb2:	f8cd 8018 	str.w	r8, [sp, #24]
-   d4cb6:	f005 fcfd 	bl	da6b4 <__aeabi_i2d>
-   d4cba:	4b3a      	ldr	r3, [pc, #232]	; (d4da4 <_Z11displayInfov+0x1bc>)
-   d4cbc:	2200      	movs	r2, #0
-   d4cbe:	f005 fe89 	bl	da9d4 <__aeabi_ddiv>
-   d4cc2:	f006 f855 	bl	dad70 <__aeabi_d2f>
-   d4cc6:	f005 fd07 	bl	da6d8 <__aeabi_f2d>
-   d4cca:	ed9d 0a09 	vldr	s0, [sp, #36]	; 0x24
-   d4cce:	e9cd 0104 	strd	r0, r1, [sp, #16]
-   d4cd2:	ee10 0a10 	vmov	r0, s0
-   d4cd6:	f005 fcff 	bl	da6d8 <__aeabi_f2d>
-   d4cda:	e9cd 0102 	strd	r0, r1, [sp, #8]
-   d4cde:	4630      	mov	r0, r6
-   d4ce0:	f005 fcfa 	bl	da6d8 <__aeabi_f2d>
-   d4ce4:	4a30      	ldr	r2, [pc, #192]	; (d4da8 <_Z11displayInfov+0x1c0>)
-   d4ce6:	e9cd 0100 	strd	r0, r1, [sp]
-   d4cea:	2180      	movs	r1, #128	; 0x80
-   d4cec:	a80c      	add	r0, sp, #48	; 0x30
-   d4cee:	f003 fb23 	bl	d8338 <snprintf>
+   d4cae:	f8d4 40b0 	ldr.w	r4, [r4, #176]	; 0xb0
+   d4cb2:	f002 ffc1 	bl	d7c38 <os_thread_scheduling>
+   d4cb6:	4638      	mov	r0, r7
+   d4cb8:	9407      	str	r4, [sp, #28]
+   d4cba:	f8cd 8018 	str.w	r8, [sp, #24]
+   d4cbe:	f005 fcf9 	bl	da6b4 <__aeabi_i2d>
+   d4cc2:	4b3a      	ldr	r3, [pc, #232]	; (d4dac <_Z11displayInfov+0x1bc>)
+   d4cc4:	2200      	movs	r2, #0
+   d4cc6:	f005 fe85 	bl	da9d4 <__aeabi_ddiv>
+   d4cca:	f006 f851 	bl	dad70 <__aeabi_d2f>
+   d4cce:	f005 fd03 	bl	da6d8 <__aeabi_f2d>
+   d4cd2:	ed9d 0a09 	vldr	s0, [sp, #36]	; 0x24
+   d4cd6:	e9cd 0104 	strd	r0, r1, [sp, #16]
+   d4cda:	ee10 0a10 	vmov	r0, s0
+   d4cde:	f005 fcfb 	bl	da6d8 <__aeabi_f2d>
+   d4ce2:	e9cd 0102 	strd	r0, r1, [sp, #8]
+   d4ce6:	4630      	mov	r0, r6
+   d4ce8:	f005 fcf6 	bl	da6d8 <__aeabi_f2d>
+   d4cec:	4a30      	ldr	r2, [pc, #192]	; (d4db0 <_Z11displayInfov+0x1c0>)
+   d4cee:	e9cd 0100 	strd	r0, r1, [sp]
+   d4cf2:	2180      	movs	r1, #128	; 0x80
+   d4cf4:	a80c      	add	r0, sp, #48	; 0x30
+   d4cf6:	f003 fb1f 	bl	d8338 <snprintf>
 			if (gettingFix) {
-   d4cf2:	782b      	ldrb	r3, [r5, #0]
-   d4cf4:	b1eb      	cbz	r3, d4d32 <_Z11displayInfov+0x14a>
+   d4cfa:	782b      	ldrb	r3, [r5, #0]
+   d4cfc:	b1eb      	cbz	r3, d4d3a <_Z11displayInfov+0x14a>
 				gettingFix = false;
-   d4cf6:	2300      	movs	r3, #0
-   d4cf8:	702b      	strb	r3, [r5, #0]
-   d4cfa:	f003 f805 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d4cfe:	2300      	movs	r3, #0
+   d4d00:	702b      	strb	r3, [r5, #0]
+   d4d02:	f003 f801 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
 				unsigned long elapsed = millis() - startFix;
-   d4cfe:	4b2b      	ldr	r3, [pc, #172]	; (d4dac <_Z11displayInfov+0x1c4>)
+   d4d06:	4b2b      	ldr	r3, [pc, #172]	; (d4db4 <_Z11displayInfov+0x1c4>)
 				Log.info("%lu milliseconds to get GPS fix", elapsed);
-   d4d00:	492b      	ldr	r1, [pc, #172]	; (d4db0 <_Z11displayInfov+0x1c8>)
-   d4d02:	681a      	ldr	r2, [r3, #0]
-   d4d04:	1a82      	subs	r2, r0, r2
-   d4d06:	482b      	ldr	r0, [pc, #172]	; (d4db4 <_Z11displayInfov+0x1cc>)
-   d4d08:	f7ff fad1 	bl	d42ae <_ZNK5spark6Logger4infoEPKcz>
-   d4d0c:	e011      	b.n	d4d32 <_Z11displayInfov+0x14a>
+   d4d08:	492b      	ldr	r1, [pc, #172]	; (d4db8 <_Z11displayInfov+0x1c8>)
+   d4d0a:	681a      	ldr	r2, [r3, #0]
+   d4d0c:	1a82      	subs	r2, r0, r2
+   d4d0e:	482b      	ldr	r0, [pc, #172]	; (d4dbc <_Z11displayInfov+0x1cc>)
+   d4d10:	f7ff facd 	bl	d42ae <_ZNK5spark6Logger4infoEPKcz>
+   d4d14:	e011      	b.n	d4d3a <_Z11displayInfov+0x14a>
 			}
 		}
 		else {
 			snprintf(buf, sizeof(buf), "no location satellites:%d", t.getSatellites());
-   d4d0e:	6878      	ldr	r0, [r7, #4]
-   d4d10:	f7ff fa69 	bl	d41e6 <_ZNK13LegacyAdapter13getSatellitesEv.isra.26>
-   d4d14:	4a28      	ldr	r2, [pc, #160]	; (d4db8 <_Z11displayInfov+0x1d0>)
-   d4d16:	4603      	mov	r3, r0
-   d4d18:	2180      	movs	r1, #128	; 0x80
-   d4d1a:	a80c      	add	r0, sp, #48	; 0x30
-   d4d1c:	f003 fb0c 	bl	d8338 <snprintf>
+   d4d16:	6878      	ldr	r0, [r7, #4]
+   d4d18:	f7ff fa65 	bl	d41e6 <_ZNK13LegacyAdapter13getSatellitesEv.isra.26>
+   d4d1c:	4a28      	ldr	r2, [pc, #160]	; (d4dc0 <_Z11displayInfov+0x1d0>)
+   d4d1e:	4603      	mov	r3, r0
+   d4d20:	2180      	movs	r1, #128	; 0x80
+   d4d22:	a80c      	add	r0, sp, #48	; 0x30
+   d4d24:	f003 fb08 	bl	d8338 <snprintf>
 			if (!gettingFix) {
-   d4d20:	782b      	ldrb	r3, [r5, #0]
-   d4d22:	b933      	cbnz	r3, d4d32 <_Z11displayInfov+0x14a>
+   d4d28:	782b      	ldrb	r3, [r5, #0]
+   d4d2a:	b933      	cbnz	r3, d4d3a <_Z11displayInfov+0x14a>
 				gettingFix = true;
-   d4d24:	4b1d      	ldr	r3, [pc, #116]	; (d4d9c <_Z11displayInfov+0x1b4>)
-   d4d26:	2201      	movs	r2, #1
-   d4d28:	701a      	strb	r2, [r3, #0]
-   d4d2a:	f002 ffed 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d4d2c:	4b1d      	ldr	r3, [pc, #116]	; (d4da4 <_Z11displayInfov+0x1b4>)
+   d4d2e:	2201      	movs	r2, #1
+   d4d30:	701a      	strb	r2, [r3, #0]
+   d4d32:	f002 ffe9 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
 				startFix = millis();
-   d4d2e:	4b1f      	ldr	r3, [pc, #124]	; (d4dac <_Z11displayInfov+0x1c4>)
-   d4d30:	6018      	str	r0, [r3, #0]
+   d4d36:	4b1f      	ldr	r3, [pc, #124]	; (d4db4 <_Z11displayInfov+0x1c4>)
+   d4d38:	6018      	str	r0, [r3, #0]
 			}
 		}
 		Log.info(buf);
-   d4d32:	a90c      	add	r1, sp, #48	; 0x30
-   d4d34:	481f      	ldr	r0, [pc, #124]	; (d4db4 <_Z11displayInfov+0x1cc>)
-   d4d36:	f7ff faba 	bl	d42ae <_ZNK5spark6Logger4infoEPKcz>
-   d4d3a:	f003 fa45 	bl	d81c8 <spark_cloud_flag_connected>
+   d4d3a:	a90c      	add	r1, sp, #48	; 0x30
+   d4d3c:	481f      	ldr	r0, [pc, #124]	; (d4dbc <_Z11displayInfov+0x1cc>)
+   d4d3e:	f7ff fab6 	bl	d42ae <_ZNK5spark6Logger4infoEPKcz>
+   d4d42:	f003 fa41 	bl	d81c8 <spark_cloud_flag_connected>
 
 		if (Particle.connected()) {
-   d4d3e:	b330      	cbz	r0, d4d8e <_Z11displayInfov+0x1a6>
+   d4d46:	b330      	cbz	r0, d4d96 <_Z11displayInfov+0x1a6>
 			if (millis() - lastPublish >= PUBLISH_PERIOD) {
-   d4d40:	4c1e      	ldr	r4, [pc, #120]	; (d4dbc <_Z11displayInfov+0x1d4>)
-   d4d42:	f002 ffe1 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
-   d4d46:	6823      	ldr	r3, [r4, #0]
-   d4d48:	1ac0      	subs	r0, r0, r3
-   d4d4a:	4b1d      	ldr	r3, [pc, #116]	; (d4dc0 <_Z11displayInfov+0x1d8>)
-   d4d4c:	4298      	cmp	r0, r3
-   d4d4e:	d91e      	bls.n	d4d8e <_Z11displayInfov+0x1a6>
-   d4d50:	f002 ffda 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
-   d4d54:	4b1b      	ldr	r3, [pc, #108]	; (d4dc4 <_Z11displayInfov+0x1dc>)
+   d4d48:	4c1e      	ldr	r4, [pc, #120]	; (d4dc4 <_Z11displayInfov+0x1d4>)
+   d4d4a:	f002 ffdd 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d4d4e:	6823      	ldr	r3, [r4, #0]
+   d4d50:	1ac0      	subs	r0, r0, r3
+   d4d52:	4b1d      	ldr	r3, [pc, #116]	; (d4dc8 <_Z11displayInfov+0x1d8>)
+   d4d54:	4298      	cmp	r0, r3
+   d4d56:	d91e      	bls.n	d4d96 <_Z11displayInfov+0x1a6>
+   d4d58:	f002 ffd6 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d4d5c:	4b1b      	ldr	r3, [pc, #108]	; (d4dcc <_Z11displayInfov+0x1dc>)
 				lastPublish = millis();
-   d4d56:	6020      	str	r0, [r4, #0]
-   d4d58:	781b      	ldrb	r3, [r3, #0]
+   d4d5e:	6020      	str	r0, [r4, #0]
+   d4d60:	781b      	ldrb	r3, [r3, #0]
         return publish(eventName, eventData, DEFAULT_CLOUD_EVENT_TTL, flags1, flags2);
     }
 
     inline particle::Future<bool> publish(const char *eventName, const char *eventData, int ttl, PublishFlags flags1, PublishFlags flags2 = PublishFlags())
     {
         return publish_event(eventName, eventData, ttl, flags1 | flags2);
-   d4d5a:	f88d 3000 	strb.w	r3, [sp]
-   d4d5e:	aa0c      	add	r2, sp, #48	; 0x30
-   d4d60:	233c      	movs	r3, #60	; 0x3c
-   d4d62:	4919      	ldr	r1, [pc, #100]	; (d4dc8 <_Z11displayInfov+0x1e0>)
-   d4d64:	a80a      	add	r0, sp, #40	; 0x28
-   d4d66:	f003 fe09 	bl	d897c <_ZN10CloudClass13publish_eventEPKcS1_iN8particle5FlagsI15PublishFlagTypehEE>
+   d4d62:	f88d 3000 	strb.w	r3, [sp]
+   d4d66:	aa0c      	add	r2, sp, #48	; 0x30
+   d4d68:	233c      	movs	r3, #60	; 0x3c
+   d4d6a:	4919      	ldr	r1, [pc, #100]	; (d4dd0 <_Z11displayInfov+0x1e0>)
+   d4d6c:	a80a      	add	r0, sp, #40	; 0x28
+   d4d6e:	f003 fe05 	bl	d897c <_ZN10CloudClass13publish_eventEPKcS1_iN8particle5FlagsI15PublishFlagTypehEE>
       // Does not throw if __r._M_get_use_count() == 0, caller must check.
       explicit __shared_count(const __weak_count<_Lp>& __r, std::nothrow_t);
 
       ~__shared_count() noexcept
       {
 	if (_M_pi != nullptr)
-   d4d6a:	9c0b      	ldr	r4, [sp, #44]	; 0x2c
-   d4d6c:	b17c      	cbz	r4, d4d8e <_Z11displayInfov+0x1a6>
+   d4d72:	9c0b      	ldr	r4, [sp, #44]	; 0x2c
+   d4d74:	b17c      	cbz	r4, d4d96 <_Z11displayInfov+0x1a6>
 
   template<>
     inline void
     _Sp_counted_base<_S_single>::_M_release() noexcept
     {
       if (--_M_use_count == 0)
-   d4d6e:	6863      	ldr	r3, [r4, #4]
-   d4d70:	3b01      	subs	r3, #1
-   d4d72:	6063      	str	r3, [r4, #4]
-   d4d74:	b95b      	cbnz	r3, d4d8e <_Z11displayInfov+0x1a6>
+   d4d76:	6863      	ldr	r3, [r4, #4]
+   d4d78:	3b01      	subs	r3, #1
+   d4d7a:	6063      	str	r3, [r4, #4]
+   d4d7c:	b95b      	cbnz	r3, d4d96 <_Z11displayInfov+0x1a6>
         {
           _M_dispose();
-   d4d76:	6823      	ldr	r3, [r4, #0]
-   d4d78:	4620      	mov	r0, r4
-   d4d7a:	689b      	ldr	r3, [r3, #8]
-   d4d7c:	4798      	blx	r3
+   d4d7e:	6823      	ldr	r3, [r4, #0]
+   d4d80:	4620      	mov	r0, r4
+   d4d82:	689b      	ldr	r3, [r3, #8]
+   d4d84:	4798      	blx	r3
           if (--_M_weak_count == 0)
-   d4d7e:	68a3      	ldr	r3, [r4, #8]
-   d4d80:	3b01      	subs	r3, #1
-   d4d82:	60a3      	str	r3, [r4, #8]
-   d4d84:	b91b      	cbnz	r3, d4d8e <_Z11displayInfov+0x1a6>
+   d4d86:	68a3      	ldr	r3, [r4, #8]
+   d4d88:	3b01      	subs	r3, #1
+   d4d8a:	60a3      	str	r3, [r4, #8]
+   d4d8c:	b91b      	cbnz	r3, d4d96 <_Z11displayInfov+0x1a6>
             _M_destroy();
-   d4d86:	6823      	ldr	r3, [r4, #0]
-   d4d88:	4620      	mov	r0, r4
-   d4d8a:	68db      	ldr	r3, [r3, #12]
-   d4d8c:	4798      	blx	r3
+   d4d8e:	6823      	ldr	r3, [r4, #0]
+   d4d90:	4620      	mov	r0, r4
+   d4d92:	68db      	ldr	r3, [r3, #12]
+   d4d94:	4798      	blx	r3
 				Particle.publish("gps", buf, PRIVATE);
 			}
 		}
 	}
 }
-   d4d8e:	b02c      	add	sp, #176	; 0xb0
-   d4d90:	e8bd 81f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, pc}
-   d4d94:	2003df5c 	.word	0x2003df5c
-   d4d98:	2003df10 	.word	0x2003df10
-   d4d9c:	2003df90 	.word	0x2003df90
-   d4da0:	2003dfe8 	.word	0x2003dfe8
-   d4da4:	40590000 	.word	0x40590000
-   d4da8:	000dcc2a 	.word	0x000dcc2a
-   d4dac:	2003dfd8 	.word	0x2003dfd8
-   d4db0:	000dcc5b 	.word	0x000dcc5b
-   d4db4:	2003e294 	.word	0x2003e294
-   d4db8:	000dcc7b 	.word	0x000dcc7b
-   d4dbc:	2003e048 	.word	0x2003e048
-   d4dc0:	0001d4bf 	.word	0x0001d4bf
-   d4dc4:	2003df0c 	.word	0x2003df0c
-   d4dc8:	000dcc95 	.word	0x000dcc95
+   d4d96:	b02c      	add	sp, #176	; 0xb0
+   d4d98:	e8bd 81f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, pc}
+   d4d9c:	2003df5c 	.word	0x2003df5c
+   d4da0:	2003df10 	.word	0x2003df10
+   d4da4:	2003df90 	.word	0x2003df90
+   d4da8:	2003dfe8 	.word	0x2003dfe8
+   d4dac:	40590000 	.word	0x40590000
+   d4db0:	000dcc2a 	.word	0x000dcc2a
+   d4db4:	2003dfd8 	.word	0x2003dfd8
+   d4db8:	000dcc5b 	.word	0x000dcc5b
+   d4dbc:	2003e294 	.word	0x2003e294
+   d4dc0:	000dcc7b 	.word	0x000dcc7b
+   d4dc4:	2003e048 	.word	0x2003e048
+   d4dc8:	0001d4bf 	.word	0x0001d4bf
+   d4dcc:	2003df0c 	.word	0x2003df0c
+   d4dd0:	000dcc95 	.word	0x000dcc95
 
-000d4dcc <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl>:
+000d4dd4 <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl>:
 inline AbstractTypeDiagnosticData<UnderlyingTypeT>::AbstractTypeDiagnosticData(DiagnosticDataId id, const char* name, diag_type type) :
         AbstractDiagnosticData(id, name, type) {
 }
 
 template<typename UnderlyingTypeT>
 inline int AbstractTypeDiagnosticData<UnderlyingTypeT>::get(DiagnosticDataId id, UnderlyingTypeT& val) {
-   d4dcc:	b530      	push	{r4, r5, lr}
-   d4dce:	b085      	sub	sp, #20
-   d4dd0:	460d      	mov	r5, r1
+   d4dd4:	b530      	push	{r4, r5, lr}
+   d4dd6:	b085      	sub	sp, #20
+   d4dd8:	460d      	mov	r5, r1
     const diag_source* src = nullptr;
-   d4dd2:	a904      	add	r1, sp, #16
-   d4dd4:	2200      	movs	r2, #0
-   d4dd6:	f841 2d10 	str.w	r2, [r1, #-16]!
+   d4dda:	a904      	add	r1, sp, #16
+   d4ddc:	2200      	movs	r2, #0
+   d4dde:	f841 2d10 	str.w	r2, [r1, #-16]!
     const int ret = diag_get_source(id, &src, nullptr);
-   d4dda:	f003 f95d 	bl	d8098 <diag_get_source>
+   d4de2:	f003 f959 	bl	d8098 <diag_get_source>
     if (ret != SYSTEM_ERROR_NONE) {
-   d4dde:	b9a8      	cbnz	r0, d4e0c <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl+0x40>
+   d4de6:	b9a8      	cbnz	r0, d4e14 <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl+0x40>
         return ret;
     }
     return get(src, val);
-   d4de0:	9c00      	ldr	r4, [sp, #0]
+   d4de8:	9c00      	ldr	r4, [sp, #0]
     }
     return get(src, data, size);
 }
 
 inline int AbstractDiagnosticData::get(const diag_source* src, void* data, size_t& size) {
     SPARK_ASSERT(src && src->callback);
-   d4de2:	b10c      	cbz	r4, d4de8 <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl+0x1c>
-   d4de4:	6923      	ldr	r3, [r4, #16]
-   d4de6:	b923      	cbnz	r3, d4df2 <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl+0x26>
-   d4de8:	4a09      	ldr	r2, [pc, #36]	; (d4e10 <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl+0x44>)
-   d4dea:	2100      	movs	r1, #0
-   d4dec:	200a      	movs	r0, #10
-   d4dee:	f003 f943 	bl	d8078 <panic_>
+   d4dea:	b10c      	cbz	r4, d4df0 <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl+0x1c>
+   d4dec:	6923      	ldr	r3, [r4, #16]
+   d4dee:	b923      	cbnz	r3, d4dfa <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl+0x26>
+   d4df0:	4a09      	ldr	r2, [pc, #36]	; (d4e18 <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl+0x44>)
+   d4df2:	2100      	movs	r1, #0
+   d4df4:	200a      	movs	r0, #10
+   d4df6:	f003 f93f 	bl	d8078 <panic_>
     diag_source_get_cmd_data d = { sizeof(diag_source_get_cmd_data), 0 /* reserved */, data, size };
-   d4df2:	2300      	movs	r3, #0
-   d4df4:	9301      	str	r3, [sp, #4]
-   d4df6:	230c      	movs	r3, #12
-   d4df8:	f8ad 3004 	strh.w	r3, [sp, #4]
-   d4dfc:	2304      	movs	r3, #4
-   d4dfe:	9303      	str	r3, [sp, #12]
-   d4e00:	9502      	str	r5, [sp, #8]
+   d4dfa:	2300      	movs	r3, #0
+   d4dfc:	9301      	str	r3, [sp, #4]
+   d4dfe:	230c      	movs	r3, #12
+   d4e00:	f8ad 3004 	strh.w	r3, [sp, #4]
+   d4e04:	2304      	movs	r3, #4
+   d4e06:	9303      	str	r3, [sp, #12]
+   d4e08:	9502      	str	r5, [sp, #8]
     const int ret = src->callback(src, DIAG_SOURCE_CMD_GET, &d);
-   d4e02:	6923      	ldr	r3, [r4, #16]
-   d4e04:	aa01      	add	r2, sp, #4
-   d4e06:	2101      	movs	r1, #1
-   d4e08:	4620      	mov	r0, r4
-   d4e0a:	4798      	blx	r3
+   d4e0a:	6923      	ldr	r3, [r4, #16]
+   d4e0c:	aa01      	add	r2, sp, #4
+   d4e0e:	2101      	movs	r1, #1
+   d4e10:	4620      	mov	r0, r4
+   d4e12:	4798      	blx	r3
     const int ret = diag_get_source(id, &src, nullptr);
     if (ret != SYSTEM_ERROR_NONE) {
         return ret;
     }
     return get(src, val);
 }
-   d4e0c:	b005      	add	sp, #20
-   d4e0e:	bd30      	pop	{r4, r5, pc}
-   d4e10:	000d7cf9 	.word	0x000d7cf9
+   d4e14:	b005      	add	sp, #20
+   d4e16:	bd30      	pop	{r4, r5, pc}
+   d4e18:	000d7cf9 	.word	0x000d7cf9
 
-000d4e14 <_Z17getBatteryContextv>:
+000d4e1c <_Z17getBatteryContextv>:
   float qualityPercentage = sig.getQuality();
 
   snprintf(SignalString,sizeof(SignalString), "%s S:%2.0f%%, Q:%2.0f%% ", radioTech[rat], strengthPercentage, qualityPercentage);
 }
 
 void getBatteryContext() {
-   d4e14:	b530      	push	{r4, r5, lr}
+   d4e1c:	b530      	push	{r4, r5, lr}
   const char* batteryContext[7] ={"Unknown","Not Charging","Charging","Charged","Discharging","Fault","Diconnected"};
-   d4e16:	4d0e      	ldr	r5, [pc, #56]	; (d4e50 <_Z17getBatteryContextv+0x3c>)
-   d4e18:	cd0f      	ldmia	r5!, {r0, r1, r2, r3}
+   d4e1e:	4d0e      	ldr	r5, [pc, #56]	; (d4e58 <_Z17getBatteryContextv+0x3c>)
+   d4e20:	cd0f      	ldmia	r5!, {r0, r1, r2, r3}
   float qualityPercentage = sig.getQuality();
 
   snprintf(SignalString,sizeof(SignalString), "%s S:%2.0f%%, Q:%2.0f%% ", radioTech[rat], strengthPercentage, qualityPercentage);
 }
 
 void getBatteryContext() {
-   d4e1a:	b089      	sub	sp, #36	; 0x24
+   d4e22:	b089      	sub	sp, #36	; 0x24
   const char* batteryContext[7] ={"Unknown","Not Charging","Charging","Charged","Discharging","Fault","Diconnected"};
-   d4e1c:	ac01      	add	r4, sp, #4
-   d4e1e:	c40f      	stmia	r4!, {r0, r1, r2, r3}
-   d4e20:	e895 0007 	ldmia.w	r5, {r0, r1, r2}
-   d4e24:	e884 0007 	stmia.w	r4, {r0, r1, r2}
+   d4e24:	ac01      	add	r4, sp, #4
+   d4e26:	c40f      	stmia	r4!, {r0, r1, r2, r3}
+   d4e28:	e895 0007 	ldmia.w	r5, {r0, r1, r2}
+   d4e2c:	e884 0007 	stmia.w	r4, {r0, r1, r2}
 inline AbstractIntegerDiagnosticData::AbstractIntegerDiagnosticData(DiagnosticDataId id, const char* name) :
         AbstractTypeDiagnosticData<int32_t>(id, name, DIAG_TYPE_INT) {
 }
 
 inline int AbstractIntegerDiagnosticData::get(DiagnosticDataId id, IntType& val) {
     return AbstractTypeDiagnosticData<IntType>::get(id, val);
-   d4e28:	4669      	mov	r1, sp
-   d4e2a:	2007      	movs	r0, #7
-   d4e2c:	f7ff ffce 	bl	d4dcc <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl>
+   d4e30:	4669      	mov	r1, sp
+   d4e32:	2007      	movs	r0, #7
+   d4e34:	f7ff ffce 	bl	d4dd4 <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl>
         return val;
     }
 
     int batteryState() const {
         particle::AbstractIntegerDiagnosticData::IntType val;
         CHECK(particle::AbstractIntegerDiagnosticData::get(DIAG_ID_SYSTEM_BATTERY_STATE, val));
-   d4e30:	2800      	cmp	r0, #0
+   d4e38:	2800      	cmp	r0, #0
         return val;
-   d4e32:	bfa8      	it	ge
-   d4e34:	9800      	ldrge	r0, [sp, #0]
+   d4e3a:	bfa8      	it	ge
+   d4e3c:	9800      	ldrge	r0, [sp, #0]
   // Battery conect information - https://docs.particle.io/reference/device-os/firmware/boron/#batterystate-
 
   snprintf(batteryContextStr, sizeof(batteryContextStr),"%s", batteryContext[System.batteryState()]);
-   d4e36:	4a07      	ldr	r2, [pc, #28]	; (d4e54 <_Z17getBatteryContextv+0x40>)
-   d4e38:	ab08      	add	r3, sp, #32
-   d4e3a:	eb03 0080 	add.w	r0, r3, r0, lsl #2
-   d4e3e:	2110      	movs	r1, #16
-   d4e40:	f850 3c1c 	ldr.w	r3, [r0, #-28]
-   d4e44:	4804      	ldr	r0, [pc, #16]	; (d4e58 <_Z17getBatteryContextv+0x44>)
-   d4e46:	f003 fa77 	bl	d8338 <snprintf>
+   d4e3e:	4a07      	ldr	r2, [pc, #28]	; (d4e5c <_Z17getBatteryContextv+0x40>)
+   d4e40:	ab08      	add	r3, sp, #32
+   d4e42:	eb03 0080 	add.w	r0, r3, r0, lsl #2
+   d4e46:	2110      	movs	r1, #16
+   d4e48:	f850 3c1c 	ldr.w	r3, [r0, #-28]
+   d4e4c:	4804      	ldr	r0, [pc, #16]	; (d4e60 <_Z17getBatteryContextv+0x44>)
+   d4e4e:	f003 fa73 	bl	d8338 <snprintf>
 
 }
-   d4e4a:	b009      	add	sp, #36	; 0x24
-   d4e4c:	bd30      	pop	{r4, r5, pc}
-   d4e4e:	bf00      	nop
-   d4e50:	000dca20 	.word	0x000dca20
-   d4e54:	000dcfca 	.word	0x000dcfca
-   d4e58:	2003df41 	.word	0x2003df41
+   d4e52:	b009      	add	sp, #36	; 0x24
+   d4e54:	bd30      	pop	{r4, r5, pc}
+   d4e56:	bf00      	nop
+   d4e58:	000dca20 	.word	0x000dca20
+   d4e5c:	000dcfca 	.word	0x000dcfca
+   d4e60:	2003df41 	.word	0x2003df41
 
-000d4e5c <_Z16takeMeasurementsv>:
+000d4e64 <_Z16takeMeasurementsv>:
   publishQueue.publish("Ubidots Hook", responseString, PRIVATE);
 }
 
 // These are the functions that are part of the takeMeasurements call
 void takeMeasurements()
 {
-   d4e5c:	b5f0      	push	{r4, r5, r6, r7, lr}
-   d4e5e:	b085      	sub	sp, #20
+   d4e64:	b5f0      	push	{r4, r5, r6, r7, lr}
+   d4e66:	b085      	sub	sp, #20
   displayInfo();
-   d4e60:	f7ff fec2 	bl	d4be8 <_Z11displayInfov>
+   d4e68:	f7ff fec2 	bl	d4bf0 <_Z11displayInfov>
         return network_listening(*this, 0, NULL);
     }
 
     bool ready()
     {
         return network_ready(*this, 0,  NULL);
-   d4e64:	4b32      	ldr	r3, [pc, #200]	; (d4f30 <_Z16takeMeasurementsv+0xd4>)
-   d4e66:	2200      	movs	r2, #0
-   d4e68:	4611      	mov	r1, r2
-   d4e6a:	6858      	ldr	r0, [r3, #4]
-   d4e6c:	f003 fa04 	bl	d8278 <network_ready>
+   d4e6c:	4b32      	ldr	r3, [pc, #200]	; (d4f38 <_Z16takeMeasurementsv+0xd4>)
+   d4e6e:	2200      	movs	r2, #0
+   d4e70:	4611      	mov	r1, r2
+   d4e72:	6858      	ldr	r0, [r3, #4]
+   d4e74:	f003 fa00 	bl	d8278 <network_ready>
 
   if (Cellular.ready()) getSignalStrength();                          // Test signal strength if the cellular modem is on and ready
-   d4e70:	b108      	cbz	r0, d4e76 <_Z16takeMeasurementsv+0x1a>
-   d4e72:	f7ff fc59 	bl	d4728 <_Z17getSignalStrengthv>
+   d4e78:	b108      	cbz	r0, d4e7e <_Z16takeMeasurementsv+0x1a>
+   d4e7a:	f7ff fc59 	bl	d4730 <_Z17getSignalStrengthv>
   for (int i = 0; i < nSENSORS; i++) {
     float temp = getTemp(sensorAddresses[i]);
-   d4e76:	4e2f      	ldr	r6, [pc, #188]	; (d4f34 <_Z16takeMeasurementsv+0xd8>)
+   d4e7e:	4e2f      	ldr	r6, [pc, #188]	; (d4f3c <_Z16takeMeasurementsv+0xd8>)
     if (!isnan(temp)) current.tempArray[i] = temp;
-   d4e78:	4f2f      	ldr	r7, [pc, #188]	; (d4f38 <_Z16takeMeasurementsv+0xdc>)
+   d4e80:	4f2f      	ldr	r7, [pc, #188]	; (d4f40 <_Z16takeMeasurementsv+0xdc>)
   publishQueue.publish("Ubidots Hook", responseString, PRIVATE);
 }
 
 // These are the functions that are part of the takeMeasurements call
 void takeMeasurements()
 {
-   d4e7a:	2400      	movs	r4, #0
+   d4e82:	2400      	movs	r4, #0
   displayInfo();
 
   if (Cellular.ready()) getSignalStrength();                          // Test signal strength if the cellular modem is on and ready
   for (int i = 0; i < nSENSORS; i++) {
     float temp = getTemp(sensorAddresses[i]);
-   d4e7c:	1930      	adds	r0, r6, r4
-   d4e7e:	f7ff fc13 	bl	d46a8 <_Z7getTempPh>
-   d4e82:	ec51 0b10 	vmov	r0, r1, d0
-   d4e86:	f005 ff73 	bl	dad70 <__aeabi_d2f>
+   d4e84:	1930      	adds	r0, r6, r4
+   d4e86:	f7ff fc13 	bl	d46b0 <_Z7getTempPh>
+   d4e8a:	ec51 0b10 	vmov	r0, r1, d0
+   d4e8e:	f005 ff6f 	bl	dad70 <__aeabi_d2f>
     if (!isnan(temp)) current.tempArray[i] = temp;
-   d4e8a:	ee07 0a90 	vmov	s15, r0
-   d4e8e:	eef4 7a67 	vcmp.f32	s15, s15
-   d4e92:	eef1 fa10 	vmrs	APSR_nzcv, fpscr
-   d4e96:	d604      	bvs.n	d4ea2 <_Z16takeMeasurementsv+0x46>
-   d4e98:	f005 fc1e 	bl	da6d8 <__aeabi_f2d>
-   d4e9c:	193d      	adds	r5, r7, r4
-   d4e9e:	e9c5 0100 	strd	r0, r1, [r5]
-   d4ea2:	3408      	adds	r4, #8
+   d4e92:	ee07 0a90 	vmov	s15, r0
+   d4e96:	eef4 7a67 	vcmp.f32	s15, s15
+   d4e9a:	eef1 fa10 	vmrs	APSR_nzcv, fpscr
+   d4e9e:	d604      	bvs.n	d4eaa <_Z16takeMeasurementsv+0x46>
+   d4ea0:	f005 fc1a 	bl	da6d8 <__aeabi_f2d>
+   d4ea4:	193d      	adds	r5, r7, r4
+   d4ea6:	e9c5 0100 	strd	r0, r1, [r5]
+   d4eaa:	3408      	adds	r4, #8
 void takeMeasurements()
 {
   displayInfo();
 
   if (Cellular.ready()) getSignalStrength();                          // Test signal strength if the cellular modem is on and ready
   for (int i = 0; i < nSENSORS; i++) {
-   d4ea4:	2c18      	cmp	r4, #24
-   d4ea6:	d1e9      	bne.n	d4e7c <_Z16takeMeasurementsv+0x20>
+   d4eac:	2c18      	cmp	r4, #24
+   d4eae:	d1e9      	bne.n	d4e84 <_Z16takeMeasurementsv+0x20>
     float temp = getTemp(sensorAddresses[i]);
     if (!isnan(temp)) current.tempArray[i] = temp;
   }
   snprintf(cabinTempStr, sizeof(cabinTempStr),"%4.2f C", current.tempArray[0]);
-   d4ea8:	4c23      	ldr	r4, [pc, #140]	; (d4f38 <_Z16takeMeasurementsv+0xdc>)
-   d4eaa:	4824      	ldr	r0, [pc, #144]	; (d4f3c <_Z16takeMeasurementsv+0xe0>)
-   d4eac:	e9d4 2300 	ldrd	r2, r3, [r4]
-   d4eb0:	210c      	movs	r1, #12
-   d4eb2:	e9cd 2300 	strd	r2, r3, [sp]
-   d4eb6:	4a22      	ldr	r2, [pc, #136]	; (d4f40 <_Z16takeMeasurementsv+0xe4>)
-   d4eb8:	f003 fa3e 	bl	d8338 <snprintf>
+   d4eb0:	4c23      	ldr	r4, [pc, #140]	; (d4f40 <_Z16takeMeasurementsv+0xdc>)
+   d4eb2:	4824      	ldr	r0, [pc, #144]	; (d4f44 <_Z16takeMeasurementsv+0xe0>)
+   d4eb4:	e9d4 2300 	ldrd	r2, r3, [r4]
+   d4eb8:	210c      	movs	r1, #12
+   d4eba:	e9cd 2300 	strd	r2, r3, [sp]
+   d4ebe:	4a22      	ldr	r2, [pc, #136]	; (d4f48 <_Z16takeMeasurementsv+0xe4>)
+   d4ec0:	f003 fa3a 	bl	d8338 <snprintf>
   snprintf(ventTempStr, sizeof(ventTempStr),"%4.2f C", current.tempArray[1]);
-   d4ebc:	e9d4 2302 	ldrd	r2, r3, [r4, #8]
-   d4ec0:	210c      	movs	r1, #12
-   d4ec2:	e9cd 2300 	strd	r2, r3, [sp]
-   d4ec6:	481f      	ldr	r0, [pc, #124]	; (d4f44 <_Z16takeMeasurementsv+0xe8>)
-   d4ec8:	4a1d      	ldr	r2, [pc, #116]	; (d4f40 <_Z16takeMeasurementsv+0xe4>)
-   d4eca:	f003 fa35 	bl	d8338 <snprintf>
+   d4ec4:	e9d4 2302 	ldrd	r2, r3, [r4, #8]
+   d4ec8:	210c      	movs	r1, #12
+   d4eca:	e9cd 2300 	strd	r2, r3, [sp]
+   d4ece:	481f      	ldr	r0, [pc, #124]	; (d4f4c <_Z16takeMeasurementsv+0xe8>)
+   d4ed0:	4a1d      	ldr	r2, [pc, #116]	; (d4f48 <_Z16takeMeasurementsv+0xe4>)
+   d4ed2:	f003 fa31 	bl	d8338 <snprintf>
   snprintf(outsideTempStr, sizeof(outsideTempStr),"%4.2f C", current.tempArray[2]);
-   d4ece:	e9d4 2304 	ldrd	r2, r3, [r4, #16]
-   d4ed2:	210c      	movs	r1, #12
-   d4ed4:	e9cd 2300 	strd	r2, r3, [sp]
-   d4ed8:	481b      	ldr	r0, [pc, #108]	; (d4f48 <_Z16takeMeasurementsv+0xec>)
-   d4eda:	4a19      	ldr	r2, [pc, #100]	; (d4f40 <_Z16takeMeasurementsv+0xe4>)
-   d4edc:	f003 fa2c 	bl	d8338 <snprintf>
+   d4ed6:	e9d4 2304 	ldrd	r2, r3, [r4, #16]
+   d4eda:	210c      	movs	r1, #12
+   d4edc:	e9cd 2300 	strd	r2, r3, [sp]
+   d4ee0:	481b      	ldr	r0, [pc, #108]	; (d4f50 <_Z16takeMeasurementsv+0xec>)
+   d4ee2:	4a19      	ldr	r2, [pc, #100]	; (d4f48 <_Z16takeMeasurementsv+0xe4>)
+   d4ee4:	f003 fa28 	bl	d8338 <snprintf>
   getBatteryContext();                                                // What is the battery up to?
-   d4ee0:	f7ff ff98 	bl	d4e14 <_Z17getBatteryContextv>
-   d4ee4:	a903      	add	r1, sp, #12
-   d4ee6:	2003      	movs	r0, #3
-   d4ee8:	f7ff ff70 	bl	d4dcc <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl>
+   d4ee8:	f7ff ff98 	bl	d4e1c <_Z17getBatteryContextv>
+   d4eec:	a903      	add	r1, sp, #12
+   d4eee:	2003      	movs	r0, #3
+   d4ef0:	f7ff ff70 	bl	d4dd4 <_ZN8particle26AbstractTypeDiagnosticDataIlE3getEtRl>
         // XXX: we could potentially simply call FuelGauge::getNormalizedSoC(),
         // however in order to exactly match the vitals values sent to the cloud we are going to use
         // diagnostic source as well.
         particle::AbstractIntegerDiagnosticData::IntType val;
         int r = particle::AbstractIntegerDiagnosticData::get(DIAG_ID_SYSTEM_BATTERY_CHARGE, val);
         if (r) {
-   d4eec:	b988      	cbnz	r0, d4f12 <_Z16takeMeasurementsv+0xb6>
+   d4ef4:	b988      	cbnz	r0, d4f1a <_Z16takeMeasurementsv+0xb6>
                     typename std::conditional<bits_fit_in_type<S, bits, int64_t>::value, typename bits_fit_in_type<S, bits, int64_t>::type, void>::type >::type >::type >::type;
 };
 
 template<typename T, typename U>
 constexpr T constexpr_pow(T b, U e) {
     return e == 0 ? 1 : b * constexpr_pow(b, e - 1);
-   d4eee:	2006      	movs	r0, #6
-   d4ef0:	eeb0 0a00 	vmov.f32	s0, #0	; 0x40000000  2.0
-   d4ef4:	f7ff f9ca 	bl	d428c <_ZN8particle13constexpr_powIfjEET_S1_T0_>
+   d4ef6:	2006      	movs	r0, #6
+   d4ef8:	eeb0 0a00 	vmov.f32	s0, #0	; 0x40000000  2.0
+   d4efc:	f7ff f9c6 	bl	d428c <_ZN8particle13constexpr_powIfjEET_S1_T0_>
     StorageT value() const {
         return value_;
     }
 
     constexpr float toFloat() const {
         return static_cast<float>(value_) / constexpr_pow(2.0f, N);
-   d4ef8:	f8bd 300c 	ldrh.w	r3, [sp, #12]
-   d4efc:	ee30 0a00 	vadd.f32	s0, s0, s0
-   d4f00:	ee07 3a10 	vmov	s14, r3
+   d4f00:	f8bd 300c 	ldrh.w	r3, [sp, #12]
    d4f04:	ee30 0a00 	vadd.f32	s0, s0, s0
-   d4f08:	eeb8 7a47 	vcvt.f32.u32	s14, s14
-   d4f0c:	eec7 7a00 	vdiv.f32	s15, s14, s0
-   d4f10:	e001      	b.n	d4f16 <_Z16takeMeasurementsv+0xba>
+   d4f08:	ee07 3a10 	vmov	s14, r3
+   d4f0c:	ee30 0a00 	vadd.f32	s0, s0, s0
+   d4f10:	eeb8 7a47 	vcvt.f32.u32	s14, s14
+   d4f14:	eec7 7a00 	vdiv.f32	s15, s14, s0
+   d4f18:	e001      	b.n	d4f1e <_Z16takeMeasurementsv+0xba>
             return -1.0f;
-   d4f12:	eeff 7a00 	vmov.f32	s15, #240	; 0xbf800000 -1.0
+   d4f1a:	eeff 7a00 	vmov.f32	s15, #240	; 0xbf800000 -1.0
   sysStatus.stateOfCharge = int(System.batteryCharge());             // Percentage of full charge
-   d4f16:	eefd 7ae7 	vcvt.s32.f32	s15, s15
-   d4f1a:	4b0c      	ldr	r3, [pc, #48]	; (d4f4c <_Z16takeMeasurementsv+0xf0>)
+   d4f1e:	eefd 7ae7 	vcvt.s32.f32	s15, s15
+   d4f22:	4b0c      	ldr	r3, [pc, #48]	; (d4f54 <_Z16takeMeasurementsv+0xf0>)
   systemStatusWriteNeeded=true;
-   d4f1c:	4a0c      	ldr	r2, [pc, #48]	; (d4f50 <_Z16takeMeasurementsv+0xf4>)
+   d4f24:	4a0c      	ldr	r2, [pc, #48]	; (d4f58 <_Z16takeMeasurementsv+0xf4>)
   }
   snprintf(cabinTempStr, sizeof(cabinTempStr),"%4.2f C", current.tempArray[0]);
   snprintf(ventTempStr, sizeof(ventTempStr),"%4.2f C", current.tempArray[1]);
   snprintf(outsideTempStr, sizeof(outsideTempStr),"%4.2f C", current.tempArray[2]);
   getBatteryContext();                                                // What is the battery up to?
   sysStatus.stateOfCharge = int(System.batteryCharge());             // Percentage of full charge
-   d4f1e:	edc3 7a02 	vstr	s15, [r3, #8]
+   d4f26:	edc3 7a02 	vstr	s15, [r3, #8]
   systemStatusWriteNeeded=true;
-   d4f22:	2301      	movs	r3, #1
-   d4f24:	7013      	strb	r3, [r2, #0]
+   d4f2a:	2301      	movs	r3, #1
+   d4f2c:	7013      	strb	r3, [r2, #0]
   currentCountsWriteNeeded=true;
-   d4f26:	4a0b      	ldr	r2, [pc, #44]	; (d4f54 <_Z16takeMeasurementsv+0xf8>)
-   d4f28:	7013      	strb	r3, [r2, #0]
+   d4f2e:	4a0b      	ldr	r2, [pc, #44]	; (d4f5c <_Z16takeMeasurementsv+0xf8>)
+   d4f30:	7013      	strb	r3, [r2, #0]
 }
-   d4f2a:	b005      	add	sp, #20
-   d4f2c:	bdf0      	pop	{r4, r5, r6, r7, pc}
-   d4f2e:	bf00      	nop
-   d4f30:	2003e25c 	.word	0x2003e25c
-   d4f34:	2003f400 	.word	0x2003f400
-   d4f38:	2003dfe8 	.word	0x2003dfe8
-   d4f3c:	2003ddd1 	.word	0x2003ddd1
-   d4f40:	000dcc99 	.word	0x000dcc99
-   d4f44:	2003dddd 	.word	0x2003dddd
-   d4f48:	2003ddc0 	.word	0x2003ddc0
-   d4f4c:	2003e04c 	.word	0x2003e04c
-   d4f50:	2003df58 	.word	0x2003df58
-   d4f54:	2003dfe0 	.word	0x2003dfe0
+   d4f32:	b005      	add	sp, #20
+   d4f34:	bdf0      	pop	{r4, r5, r6, r7, pc}
+   d4f36:	bf00      	nop
+   d4f38:	2003e25c 	.word	0x2003e25c
+   d4f3c:	2003f400 	.word	0x2003f400
+   d4f40:	2003dfe8 	.word	0x2003dfe8
+   d4f44:	2003ddd1 	.word	0x2003ddd1
+   d4f48:	000dcc99 	.word	0x000dcc99
+   d4f4c:	2003dddd 	.word	0x2003dddd
+   d4f50:	2003ddc0 	.word	0x2003ddc0
+   d4f54:	2003e04c 	.word	0x2003e04c
+   d4f58:	2003df58 	.word	0x2003df58
+   d4f5c:	2003dfe0 	.word	0x2003dfe0
 
-000d4f58 <loop>:
+000d4f60 <loop>:
 
   digitalWrite(blueLED,LOW);
 }
 
 void loop()
 {
-   d4f58:	b573      	push	{r0, r1, r4, r5, r6, lr}
+   d4f60:	b573      	push	{r0, r1, r4, r5, r6, lr}
   switch(state) {
-   d4f5a:	4c9a      	ldr	r4, [pc, #616]	; (d51c4 <loop+0x26c>)
-   d4f5c:	7823      	ldrb	r3, [r4, #0]
-   d4f5e:	3b01      	subs	r3, #1
-   d4f60:	2b05      	cmp	r3, #5
-   d4f62:	f200 8122 	bhi.w	d51aa <loop+0x252>
-   d4f66:	e8df f003 	tbb	[pc, r3]
-   d4f6a:	03bd      	.short	0x03bd
-   d4f6c:	96774473 	.word	0x96774473
+   d4f62:	4c98      	ldr	r4, [pc, #608]	; (d51c4 <loop+0x264>)
+   d4f64:	7823      	ldrb	r3, [r4, #0]
+   d4f66:	3b01      	subs	r3, #1
+   d4f68:	2b05      	cmp	r3, #5
+   d4f6a:	f200 8118 	bhi.w	d519e <loop+0x23e>
+   d4f6e:	e8df f003 	tbb	[pc, r3]
+   d4f72:	03b3      	.short	0x03b3
+   d4f74:	8c6d3a69 	.word	0x8c6d3a69
   case IDLE_STATE:                                                    // Where we spend most time - note, the order of these conditionals is important
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
-   d4f70:	4b95      	ldr	r3, [pc, #596]	; (d51c8 <loop+0x270>)
-   d4f72:	791a      	ldrb	r2, [r3, #4]
-   d4f74:	461e      	mov	r6, r3
-   d4f76:	b12a      	cbz	r2, d4f84 <loop+0x2c>
-   d4f78:	4b94      	ldr	r3, [pc, #592]	; (d51cc <loop+0x274>)
-   d4f7a:	781b      	ldrb	r3, [r3, #0]
-   d4f7c:	2b02      	cmp	r3, #2
-   d4f7e:	d001      	beq.n	d4f84 <loop+0x2c>
-   d4f80:	f7ff fcf2 	bl	d4968 <_Z22publishStateTransitionv>
+   d4f78:	4b93      	ldr	r3, [pc, #588]	; (d51c8 <loop+0x268>)
+   d4f7a:	791a      	ldrb	r2, [r3, #4]
+   d4f7c:	461e      	mov	r6, r3
+   d4f7e:	b12a      	cbz	r2, d4f8c <loop+0x2c>
+   d4f80:	4b92      	ldr	r3, [pc, #584]	; (d51cc <loop+0x26c>)
+   d4f82:	781b      	ldrb	r3, [r3, #0]
+   d4f84:	2b02      	cmp	r3, #2
+   d4f86:	d001      	beq.n	d4f8c <loop+0x2c>
+   d4f88:	f7ff fcf2 	bl	d4970 <_Z22publishStateTransitionv>
     if (watchdogFlag) petWatchdog();                                  // Watchdog flag is raised - time to pet the watchdog
-   d4f84:	4b92      	ldr	r3, [pc, #584]	; (d51d0 <loop+0x278>)
-   d4f86:	781b      	ldrb	r3, [r3, #0]
-   d4f88:	b10b      	cbz	r3, d4f8e <loop+0x36>
-   d4f8a:	f7ff fc09 	bl	d47a0 <_Z11petWatchdogv>
+   d4f8c:	4b90      	ldr	r3, [pc, #576]	; (d51d0 <loop+0x270>)
+   d4f8e:	781b      	ldrb	r3, [r3, #0]
+   d4f90:	b10b      	cbz	r3, d4f96 <loop+0x36>
+   d4f92:	f7ff fc09 	bl	d47a8 <_Z11petWatchdogv>
     if (systemStatusWriteNeeded) {
-   d4f8e:	4d91      	ldr	r5, [pc, #580]	; (d51d4 <loop+0x27c>)
-   d4f90:	782b      	ldrb	r3, [r5, #0]
-   d4f92:	b13b      	cbz	r3, d4fa4 <loop+0x4c>
+   d4f96:	4d8f      	ldr	r5, [pc, #572]	; (d51d4 <loop+0x274>)
+   d4f98:	782b      	ldrb	r3, [r5, #0]
+   d4f9a:	b13b      	cbz	r3, d4fac <loop+0x4c>
 	 *
 	 * @param framAddr The address in the FRAM to write to
 	 * @param t The variable to write from. t is not modified.
 	 */
     template <typename T> const T &put(size_t framAddr, const T &t) {
         writeData(framAddr, (const uint8_t *)&t, sizeof(T));
-   d4f94:	2320      	movs	r3, #32
-   d4f96:	4a8c      	ldr	r2, [pc, #560]	; (d51c8 <loop+0x270>)
-   d4f98:	488f      	ldr	r0, [pc, #572]	; (d51d8 <loop+0x280>)
-   d4f9a:	2101      	movs	r1, #1
-   d4f9c:	f000 fde6 	bl	d5b6c <_ZN6MB85RC9writeDataEjPKhj>
+   d4f9c:	2320      	movs	r3, #32
+   d4f9e:	4a8a      	ldr	r2, [pc, #552]	; (d51c8 <loop+0x268>)
+   d4fa0:	488d      	ldr	r0, [pc, #564]	; (d51d8 <loop+0x278>)
+   d4fa2:	2101      	movs	r1, #1
+   d4fa4:	f000 fde2 	bl	d5b6c <_ZN6MB85RC9writeDataEjPKhj>
       fram.put(FRAM::systemStatusAddr,sysStatus);
       systemStatusWriteNeeded = false;
-   d4fa0:	2300      	movs	r3, #0
-   d4fa2:	702b      	strb	r3, [r5, #0]
+   d4fa8:	2300      	movs	r3, #0
+   d4faa:	702b      	strb	r3, [r5, #0]
     }
     if (currentCountsWriteNeeded) {
-   d4fa4:	4d8d      	ldr	r5, [pc, #564]	; (d51dc <loop+0x284>)
-   d4fa6:	782b      	ldrb	r3, [r5, #0]
-   d4fa8:	b13b      	cbz	r3, d4fba <loop+0x62>
-   d4faa:	2330      	movs	r3, #48	; 0x30
-   d4fac:	4a8c      	ldr	r2, [pc, #560]	; (d51e0 <loop+0x288>)
-   d4fae:	488a      	ldr	r0, [pc, #552]	; (d51d8 <loop+0x280>)
-   d4fb0:	2150      	movs	r1, #80	; 0x50
-   d4fb2:	f000 fddb 	bl	d5b6c <_ZN6MB85RC9writeDataEjPKhj>
+   d4fac:	4d8b      	ldr	r5, [pc, #556]	; (d51dc <loop+0x27c>)
+   d4fae:	782b      	ldrb	r3, [r5, #0]
+   d4fb0:	b13b      	cbz	r3, d4fc2 <loop+0x62>
+   d4fb2:	2330      	movs	r3, #48	; 0x30
+   d4fb4:	4a8a      	ldr	r2, [pc, #552]	; (d51e0 <loop+0x280>)
+   d4fb6:	4888      	ldr	r0, [pc, #544]	; (d51d8 <loop+0x278>)
+   d4fb8:	2150      	movs	r1, #80	; 0x50
+   d4fba:	f000 fdd7 	bl	d5b6c <_ZN6MB85RC9writeDataEjPKhj>
       fram.put(FRAM::currentCountsAddr,current);
       currentCountsWriteNeeded = false;
-   d4fb6:	2300      	movs	r3, #0
-   d4fb8:	702b      	strb	r3, [r5, #0]
+   d4fbe:	2300      	movs	r3, #0
+   d4fc0:	702b      	strb	r3, [r5, #0]
     }
-    if ((Time.minute() == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;           //  on hourly interval
-   d4fba:	f004 fe29 	bl	d9c10 <_ZN9TimeClass6minuteEv>
-   d4fbe:	b930      	cbnz	r0, d4fce <loop+0x76>
-   d4fc0:	f004 fe26 	bl	d9c10 <_ZN9TimeClass6minuteEv>
-   d4fc4:	4b87      	ldr	r3, [pc, #540]	; (d51e4 <loop+0x28c>)
-   d4fc6:	681b      	ldr	r3, [r3, #0]
-   d4fc8:	4298      	cmp	r0, r3
-   d4fca:	f040 80f4 	bne.w	d51b6 <loop+0x25e>
     if ((Time.minute() % sysStatus.sampleIntervalMin == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;   // sub hourly interval
-   d4fce:	f004 fe1f 	bl	d9c10 <_ZN9TimeClass6minuteEv>
-   d4fd2:	79b3      	ldrb	r3, [r6, #6]
-   d4fd4:	fb90 f2f3 	sdiv	r2, r0, r3
-   d4fd8:	fb02 0013 	mls	r0, r2, r3, r0
-   d4fdc:	2800      	cmp	r0, #0
-   d4fde:	f040 80e4 	bne.w	d51aa <loop+0x252>
-   d4fe2:	f004 fe15 	bl	d9c10 <_ZN9TimeClass6minuteEv>
-   d4fe6:	4b7f      	ldr	r3, [pc, #508]	; (d51e4 <loop+0x28c>)
-   d4fe8:	681b      	ldr	r3, [r3, #0]
-   d4fea:	4298      	cmp	r0, r3
-   d4fec:	f040 80e6 	bne.w	d51bc <loop+0x264>
-   d4ff0:	e0db      	b.n	d51aa <loop+0x252>
+   d4fc2:	f004 fe25 	bl	d9c10 <_ZN9TimeClass6minuteEv>
+   d4fc6:	79b3      	ldrb	r3, [r6, #6]
+   d4fc8:	fb90 f2f3 	sdiv	r2, r0, r3
+   d4fcc:	fb02 0013 	mls	r0, r2, r3, r0
+   d4fd0:	2800      	cmp	r0, #0
+   d4fd2:	f040 80ea 	bne.w	d51aa <loop+0x24a>
+   d4fd6:	f004 fe1b 	bl	d9c10 <_ZN9TimeClass6minuteEv>
+   d4fda:	4b82      	ldr	r3, [pc, #520]	; (d51e4 <loop+0x284>)
+   d4fdc:	681b      	ldr	r3, [r3, #0]
+   d4fde:	4298      	cmp	r0, r3
+   d4fe0:	f040 80ed 	bne.w	d51be <loop+0x25e>
+   d4fe4:	e0e1      	b.n	d51aa <loop+0x24a>
+    else if ((Time.minute() == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;           //  on hourly interval
     break;
 
   case SLEEPING_STATE: {                                              // This state is triggered once the park closes and runs until it opens
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
-   d4ff2:	4c75      	ldr	r4, [pc, #468]	; (d51c8 <loop+0x270>)
-   d4ff4:	7923      	ldrb	r3, [r4, #4]
-   d4ff6:	b12b      	cbz	r3, d5004 <loop+0xac>
-   d4ff8:	4b74      	ldr	r3, [pc, #464]	; (d51cc <loop+0x274>)
-   d4ffa:	781b      	ldrb	r3, [r3, #0]
-   d4ffc:	2b04      	cmp	r3, #4
-   d4ffe:	d001      	beq.n	d5004 <loop+0xac>
-   d5000:	f7ff fcb2 	bl	d4968 <_Z22publishStateTransitionv>
+   d4fe6:	4c78      	ldr	r4, [pc, #480]	; (d51c8 <loop+0x268>)
+   d4fe8:	7923      	ldrb	r3, [r4, #4]
+   d4fea:	b12b      	cbz	r3, d4ff8 <loop+0x98>
+   d4fec:	4b77      	ldr	r3, [pc, #476]	; (d51cc <loop+0x26c>)
+   d4fee:	781b      	ldrb	r3, [r3, #0]
+   d4ff0:	2b04      	cmp	r3, #4
+   d4ff2:	d001      	beq.n	d4ff8 <loop+0x98>
+   d4ff4:	f7ff fcbc 	bl	d4970 <_Z22publishStateTransitionv>
     if (sysStatus.connectedStatus) disconnectFromParticle();          // Disconnect cleanly from Particle
-   d5004:	78e3      	ldrb	r3, [r4, #3]
-   d5006:	b10b      	cbz	r3, d500c <loop+0xb4>
-   d5008:	f7ff fc7a 	bl	d4900 <_Z22disconnectFromParticlev>
+   d4ff8:	78e3      	ldrb	r3, [r4, #3]
+   d4ffa:	b10b      	cbz	r3, d5000 <loop+0xa0>
+   d4ffc:	f7ff fc84 	bl	d4908 <_Z22disconnectFromParticlev>
     digitalWrite(blueLED,LOW);                                        // Turn off the LED
-   d500c:	2100      	movs	r1, #0
-   d500e:	2007      	movs	r0, #7
-   d5010:	f005 f825 	bl	da05e <digitalWrite>
+   d5000:	2100      	movs	r1, #0
+   d5002:	2007      	movs	r0, #7
+   d5004:	f005 f82b 	bl	da05e <digitalWrite>
     petWatchdog();
-   d5014:	f7ff fbc4 	bl	d47a0 <_Z11petWatchdogv>
+   d5008:	f7ff fbce 	bl	d47a8 <_Z11petWatchdogv>
     int wakeInSeconds = constrain(sysStatus.sampleIntervalMin * 60  - Time.now() % sysStatus.sampleIntervalMin * 60, 1, sysStatus.sampleIntervalMin * 60);
-   d5018:	79a5      	ldrb	r5, [r4, #6]
-   d501a:	f004 fde8 	bl	d9bee <_ZN9TimeClass3nowEv>
-   d501e:	79a3      	ldrb	r3, [r4, #6]
-   d5020:	fb90 f2f3 	sdiv	r2, r0, r3
-   d5024:	fb02 0013 	mls	r0, r2, r3, r0
-   d5028:	f06f 023b 	mvn.w	r2, #59	; 0x3b
-   d502c:	4350      	muls	r0, r2
-   d502e:	223c      	movs	r2, #60	; 0x3c
-   d5030:	fb12 0105 	smlabb	r1, r2, r5, r0
-   d5034:	ebc3 1303 	rsb	r3, r3, r3, lsl #4
+   d500c:	79a5      	ldrb	r5, [r4, #6]
+   d500e:	f004 fdee 	bl	d9bee <_ZN9TimeClass3nowEv>
+   d5012:	79a3      	ldrb	r3, [r4, #6]
+   d5014:	fb90 f2f3 	sdiv	r2, r0, r3
+   d5018:	fb02 0013 	mls	r0, r2, r3, r0
+   d501c:	f06f 023b 	mvn.w	r2, #59	; 0x3b
+   d5020:	4350      	muls	r0, r2
+   d5022:	223c      	movs	r2, #60	; 0x3c
+   d5024:	fb12 0105 	smlabb	r1, r2, r5, r0
+   d5028:	ebc3 1303 	rsb	r3, r3, r3, lsl #4
 typename std::common_type<T, U>::type
 min (T a, U b) { return static_cast<typename std::common_type<T, U>::type>((a)<(b)?(a):(b)); }
 
 template <typename T, typename U, typename V>
 static inline
 T constrain (T amt, U low, V high) { return ((amt)<(low)?(low):((amt)>(high)?(high):(amt))); }
-   d5038:	2900      	cmp	r1, #0
-   d503a:	ea4f 0383 	mov.w	r3, r3, lsl #2
-   d503e:	dd03      	ble.n	d5048 <loop+0xf0>
-   d5040:	4299      	cmp	r1, r3
-   d5042:	bfa8      	it	ge
-   d5044:	4619      	movge	r1, r3
-   d5046:	e000      	b.n	d504a <loop+0xf2>
-   d5048:	2101      	movs	r1, #1
+   d502c:	2900      	cmp	r1, #0
+   d502e:	ea4f 0383 	mov.w	r3, r3, lsl #2
+   d5032:	dd03      	ble.n	d503c <loop+0xdc>
+   d5034:	4299      	cmp	r1, r3
+   d5036:	bfa8      	it	ge
+   d5038:	4619      	movge	r1, r3
+   d503a:	e000      	b.n	d503e <loop+0xde>
+   d503c:	2101      	movs	r1, #1
     rtc.setAlarm(wakeInSeconds);                                // The Real Time Clock will turn the Enable pin back on to wake the device
-   d504a:	2300      	movs	r3, #0
-   d504c:	2201      	movs	r2, #1
-   d504e:	e091      	b.n	d5174 <loop+0x21c>
+   d503e:	2300      	movs	r3, #0
+   d5040:	2201      	movs	r2, #1
+   d5042:	e091      	b.n	d5168 <loop+0x208>
     } break;
 
   case MEASURING_STATE:
     takeMeasurements();                                             // Update Temp, Battery and Signal Strength values
-   d5050:	f7ff ff04 	bl	d4e5c <_Z16takeMeasurementsv>
+   d5044:	f7ff ff0e 	bl	d4e64 <_Z16takeMeasurementsv>
     state = REPORTING_STATE;
-   d5054:	2305      	movs	r3, #5
-   d5056:	e0b2      	b.n	d51be <loop+0x266>
+   d5048:	2305      	movs	r3, #5
+   d504a:	e0b9      	b.n	d51c0 <loop+0x260>
     break;
 
   case REPORTING_STATE:
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
-   d5058:	4b5b      	ldr	r3, [pc, #364]	; (d51c8 <loop+0x270>)
-   d505a:	791a      	ldrb	r2, [r3, #4]
-   d505c:	461d      	mov	r5, r3
-   d505e:	b12a      	cbz	r2, d506c <loop+0x114>
-   d5060:	4b5a      	ldr	r3, [pc, #360]	; (d51cc <loop+0x274>)
-   d5062:	781b      	ldrb	r3, [r3, #0]
-   d5064:	2b05      	cmp	r3, #5
-   d5066:	d001      	beq.n	d506c <loop+0x114>
-   d5068:	f7ff fc7e 	bl	d4968 <_Z22publishStateTransitionv>
+   d504c:	4b5e      	ldr	r3, [pc, #376]	; (d51c8 <loop+0x268>)
+   d504e:	791a      	ldrb	r2, [r3, #4]
+   d5050:	461d      	mov	r5, r3
+   d5052:	b12a      	cbz	r2, d5060 <loop+0x100>
+   d5054:	4b5d      	ldr	r3, [pc, #372]	; (d51cc <loop+0x26c>)
+   d5056:	781b      	ldrb	r3, [r3, #0]
+   d5058:	2b05      	cmp	r3, #5
+   d505a:	d001      	beq.n	d5060 <loop+0x100>
+   d505c:	f7ff fc88 	bl	d4970 <_Z22publishStateTransitionv>
     if (!sysStatus.connectedStatus) connectToParticle();              // Only attempt to connect if not already New process to get connected
-   d506c:	78eb      	ldrb	r3, [r5, #3]
-   d506e:	b90b      	cbnz	r3, d5074 <loop+0x11c>
-   d5070:	f7ff fbf8 	bl	d4864 <_Z17connectToParticlev>
+   d5060:	78eb      	ldrb	r3, [r5, #3]
+   d5062:	b90b      	cbnz	r3, d5068 <loop+0x108>
+   d5064:	f7ff fc02 	bl	d486c <_Z17connectToParticlev>
     static void sleep(Spark_Sleep_TypeDef sleepMode, long seconds=0) __attribute__ ((deprecated("Please use System.sleep() instead.")))
     { SystemClass::sleep(sleepMode, seconds); }
     static void sleep(uint16_t wakeUpPin, InterruptMode edgeTriggerMode, long seconds=0) __attribute__ ((deprecated("Please use System.sleep() instead.")))
     { SystemClass::sleep(wakeUpPin, edgeTriggerMode, seconds); }
 
     static bool connected(void) { return spark_cloud_flag_connected(); }
-   d5074:	f003 f8a8 	bl	d81c8 <spark_cloud_flag_connected>
+   d5068:	f003 f8ae 	bl	d81c8 <spark_cloud_flag_connected>
     if (Particle.connected()) {
-   d5078:	b140      	cbz	r0, d508c <loop+0x134>
+   d506c:	b140      	cbz	r0, d5080 <loop+0x120>
       if (Time.hour() == 0) dailyCleanup();          // Once a day, clean house
-   d507a:	f004 fdbf 	bl	d9bfc <_ZN9TimeClass4hourEv>
-   d507e:	b908      	cbnz	r0, d5084 <loop+0x12c>
-   d5080:	f7ff fcd4 	bl	d4a2c <_Z12dailyCleanupv>
+   d506e:	f004 fdc5 	bl	d9bfc <_ZN9TimeClass4hourEv>
+   d5072:	b908      	cbnz	r0, d5078 <loop+0x118>
+   d5074:	f7ff fcde 	bl	d4a34 <_Z12dailyCleanupv>
       sendEvent();                                                    // Send data to Ubidots
-   d5084:	f7ff fab0 	bl	d45e8 <_Z9sendEventv>
+   d5078:	f7ff fab8 	bl	d45ec <_Z9sendEventv>
       state = RESP_WAIT_STATE;                                        // Wait for Response
-   d5088:	2306      	movs	r3, #6
-   d508a:	e098      	b.n	d51be <loop+0x266>
-   d508c:	f002 fe3c 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d507c:	2306      	movs	r3, #6
+   d507e:	e09f      	b.n	d51c0 <loop+0x260>
+   d5080:	f002 fe42 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
     }
     else {
       resetTimeStamp = millis();
-   d5090:	4b55      	ldr	r3, [pc, #340]	; (d51e8 <loop+0x290>)
-   d5092:	6018      	str	r0, [r3, #0]
-   d5094:	e024      	b.n	d50e0 <loop+0x188>
+   d5084:	4b58      	ldr	r3, [pc, #352]	; (d51e8 <loop+0x288>)
+   d5086:	6018      	str	r0, [r3, #0]
+   d5088:	e024      	b.n	d50d4 <loop+0x174>
       state = ERROR_STATE;
     }
     break;
 
   case RESP_WAIT_STATE:
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
-   d5096:	4b4c      	ldr	r3, [pc, #304]	; (d51c8 <loop+0x270>)
-   d5098:	791b      	ldrb	r3, [r3, #4]
-   d509a:	b12b      	cbz	r3, d50a8 <loop+0x150>
-   d509c:	4b4b      	ldr	r3, [pc, #300]	; (d51cc <loop+0x274>)
-   d509e:	781b      	ldrb	r3, [r3, #0]
-   d50a0:	2b06      	cmp	r3, #6
-   d50a2:	d001      	beq.n	d50a8 <loop+0x150>
-   d50a4:	f7ff fc60 	bl	d4968 <_Z22publishStateTransitionv>
+   d508a:	4b4f      	ldr	r3, [pc, #316]	; (d51c8 <loop+0x268>)
+   d508c:	791b      	ldrb	r3, [r3, #4]
+   d508e:	b12b      	cbz	r3, d509c <loop+0x13c>
+   d5090:	4b4e      	ldr	r3, [pc, #312]	; (d51cc <loop+0x26c>)
+   d5092:	781b      	ldrb	r3, [r3, #0]
+   d5094:	2b06      	cmp	r3, #6
+   d5096:	d001      	beq.n	d509c <loop+0x13c>
+   d5098:	f7ff fc6a 	bl	d4970 <_Z22publishStateTransitionv>
     if (!dataInFlight)  {                                             // Response received back to IDLE state
-   d50a8:	4b50      	ldr	r3, [pc, #320]	; (d51ec <loop+0x294>)
-   d50aa:	781b      	ldrb	r3, [r3, #0]
-   d50ac:	b90b      	cbnz	r3, d50b2 <loop+0x15a>
+   d509c:	4b53      	ldr	r3, [pc, #332]	; (d51ec <loop+0x28c>)
+   d509e:	781b      	ldrb	r3, [r3, #0]
+   d50a0:	b90b      	cbnz	r3, d50a6 <loop+0x146>
       state = IDLE_STATE;
-   d50ae:	2302      	movs	r3, #2
-   d50b0:	e085      	b.n	d51be <loop+0x266>
-   d50b2:	f002 fe29 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d50a2:	2302      	movs	r3, #2
+   d50a4:	e08c      	b.n	d51c0 <loop+0x260>
+   d50a6:	f002 fe2f 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
     }
     else if (millis() - webhookTimeStamp > webhookWait) {             // If it takes too long - will need to reset
-   d50b6:	4b4e      	ldr	r3, [pc, #312]	; (d51f0 <loop+0x298>)
-   d50b8:	681b      	ldr	r3, [r3, #0]
-   d50ba:	1ac0      	subs	r0, r0, r3
-   d50bc:	f64a 73c8 	movw	r3, #45000	; 0xafc8
-   d50c0:	4298      	cmp	r0, r3
-   d50c2:	d972      	bls.n	d51aa <loop+0x252>
-   d50c4:	f002 fe20 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d50aa:	4b51      	ldr	r3, [pc, #324]	; (d51f0 <loop+0x290>)
+   d50ac:	681b      	ldr	r3, [r3, #0]
+   d50ae:	1ac0      	subs	r0, r0, r3
+   d50b0:	f64a 73c8 	movw	r3, #45000	; 0xafc8
+   d50b4:	4298      	cmp	r0, r3
+   d50b6:	d972      	bls.n	d519e <loop+0x23e>
+   d50b8:	f002 fe26 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
       resetTimeStamp = millis();
-   d50c8:	4b47      	ldr	r3, [pc, #284]	; (d51e8 <loop+0x290>)
+   d50bc:	4b4a      	ldr	r3, [pc, #296]	; (d51e8 <loop+0x288>)
       publishQueue.publish("spark/device/session/end", "", PRIVATE);      // If the device times out on the Webhook response, it will ensure a new session is started on next connect
-   d50ca:	494a      	ldr	r1, [pc, #296]	; (d51f4 <loop+0x29c>)
+   d50be:	494d      	ldr	r1, [pc, #308]	; (d51f4 <loop+0x294>)
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
     if (!dataInFlight)  {                                             // Response received back to IDLE state
       state = IDLE_STATE;
     }
     else if (millis() - webhookTimeStamp > webhookWait) {             // If it takes too long - will need to reset
       resetTimeStamp = millis();
-   d50cc:	6018      	str	r0, [r3, #0]
-   d50ce:	4b4a      	ldr	r3, [pc, #296]	; (d51f8 <loop+0x2a0>)
+   d50c0:	6018      	str	r0, [r3, #0]
+   d50c2:	4b4d      	ldr	r3, [pc, #308]	; (d51f8 <loop+0x298>)
       publishQueue.publish("spark/device/session/end", "", PRIVATE);      // If the device times out on the Webhook response, it will ensure a new session is started on next connect
-   d50d0:	484a      	ldr	r0, [pc, #296]	; (d51fc <loop+0x2a4>)
-   d50d2:	781b      	ldrb	r3, [r3, #0]
+   d50c4:	484d      	ldr	r0, [pc, #308]	; (d51fc <loop+0x29c>)
+   d50c6:	781b      	ldrb	r3, [r3, #0]
 }
 
 // particle::Flags<TagT, ValueT>
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags() :
         val_(0) {
-   d50d4:	2200      	movs	r2, #0
-   d50d6:	f88d 2000 	strb.w	r2, [sp]
-   d50da:	4a49      	ldr	r2, [pc, #292]	; (d5200 <loop+0x2a8>)
-   d50dc:	f7ff f8fe 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
+   d50c8:	2200      	movs	r2, #0
+   d50ca:	f88d 2000 	strb.w	r2, [sp]
+   d50ce:	4a4c      	ldr	r2, [pc, #304]	; (d5200 <loop+0x2a0>)
+   d50d0:	f7ff f904 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
       state = ERROR_STATE;                                            // Response timed out
-   d50e0:	2301      	movs	r3, #1
-   d50e2:	e06c      	b.n	d51be <loop+0x266>
+   d50d4:	2301      	movs	r3, #1
+   d50d6:	e073      	b.n	d51c0 <loop+0x260>
     }
     break;
 
   case ERROR_STATE:                                                   // To be enhanced - where we deal with errors
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
-   d50e4:	4c38      	ldr	r4, [pc, #224]	; (d51c8 <loop+0x270>)
-   d50e6:	7923      	ldrb	r3, [r4, #4]
-   d50e8:	b12b      	cbz	r3, d50f6 <loop+0x19e>
-   d50ea:	4b38      	ldr	r3, [pc, #224]	; (d51cc <loop+0x274>)
-   d50ec:	781b      	ldrb	r3, [r3, #0]
-   d50ee:	2b01      	cmp	r3, #1
-   d50f0:	d001      	beq.n	d50f6 <loop+0x19e>
-   d50f2:	f7ff fc39 	bl	d4968 <_Z22publishStateTransitionv>
-   d50f6:	f002 fe07 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
+   d50d8:	4c3b      	ldr	r4, [pc, #236]	; (d51c8 <loop+0x268>)
+   d50da:	7923      	ldrb	r3, [r4, #4]
+   d50dc:	b12b      	cbz	r3, d50ea <loop+0x18a>
+   d50de:	4b3b      	ldr	r3, [pc, #236]	; (d51cc <loop+0x26c>)
+   d50e0:	781b      	ldrb	r3, [r3, #0]
+   d50e2:	2b01      	cmp	r3, #1
+   d50e4:	d001      	beq.n	d50ea <loop+0x18a>
+   d50e6:	f7ff fc43 	bl	d4970 <_Z22publishStateTransitionv>
+   d50ea:	f002 fe0d 	bl	d7d08 <HAL_Timer_Get_Milli_Seconds>
     if (millis() > resetTimeStamp + resetWait) {
-   d50fa:	4b3b      	ldr	r3, [pc, #236]	; (d51e8 <loop+0x290>)
-   d50fc:	681b      	ldr	r3, [r3, #0]
-   d50fe:	f503 43ea 	add.w	r3, r3, #29952	; 0x7500
-   d5102:	3330      	adds	r3, #48	; 0x30
-   d5104:	4298      	cmp	r0, r3
-   d5106:	d950      	bls.n	d51aa <loop+0x252>
+   d50ee:	4b3e      	ldr	r3, [pc, #248]	; (d51e8 <loop+0x288>)
+   d50f0:	681b      	ldr	r3, [r3, #0]
+   d50f2:	f503 43ea 	add.w	r3, r3, #29952	; 0x7500
+   d50f6:	3330      	adds	r3, #48	; 0x30
+   d50f8:	4298      	cmp	r0, r3
+   d50fa:	d950      	bls.n	d519e <loop+0x23e>
       if (sysStatus.resetCount <= 3) {                                          // First try simple reset
-   d5108:	6923      	ldr	r3, [r4, #16]
-   d510a:	2b03      	cmp	r3, #3
-   d510c:	dc13      	bgt.n	d5136 <loop+0x1de>
-   d510e:	f003 f85b 	bl	d81c8 <spark_cloud_flag_connected>
+   d50fc:	6923      	ldr	r3, [r4, #16]
+   d50fe:	2b03      	cmp	r3, #3
+   d5100:	dc13      	bgt.n	d512a <loop+0x1ca>
+   d5102:	f003 f861 	bl	d81c8 <spark_cloud_flag_connected>
         if (Particle.connected()) publishQueue.publish("State","Error State - Reset", PRIVATE);    // Brodcast Reset Action
-   d5112:	b148      	cbz	r0, d5128 <loop+0x1d0>
-   d5114:	4b38      	ldr	r3, [pc, #224]	; (d51f8 <loop+0x2a0>)
-   d5116:	493b      	ldr	r1, [pc, #236]	; (d5204 <loop+0x2ac>)
+   d5106:	b148      	cbz	r0, d511c <loop+0x1bc>
+   d5108:	4b3b      	ldr	r3, [pc, #236]	; (d51f8 <loop+0x298>)
+   d510a:	493e      	ldr	r1, [pc, #248]	; (d5204 <loop+0x2a4>)
 }
 
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags(Flag<TagT, ValueT> flag) :
         val_(flag.value()) {
-   d5118:	781b      	ldrb	r3, [r3, #0]
-   d511a:	4838      	ldr	r0, [pc, #224]	; (d51fc <loop+0x2a4>)
+   d510c:	781b      	ldrb	r3, [r3, #0]
+   d510e:	483b      	ldr	r0, [pc, #236]	; (d51fc <loop+0x29c>)
 }
 
 // particle::Flags<TagT, ValueT>
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags() :
         val_(0) {
-   d511c:	2200      	movs	r2, #0
-   d511e:	f88d 2000 	strb.w	r2, [sp]
-   d5122:	4a39      	ldr	r2, [pc, #228]	; (d5208 <loop+0x2b0>)
-   d5124:	f7ff f8da 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
+   d5110:	2200      	movs	r2, #0
+   d5112:	f88d 2000 	strb.w	r2, [sp]
+   d5116:	4a3c      	ldr	r2, [pc, #240]	; (d5208 <loop+0x2a8>)
+   d5118:	f7ff f8e0 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
         delay(2000);
-   d5128:	f44f 60fa 	mov.w	r0, #2000	; 0x7d0
-   d512c:	f003 f92c 	bl	d8388 <delay>
+   d511c:	f44f 60fa 	mov.w	r0, #2000	; 0x7d0
+   d5120:	f003 f932 	bl	d8388 <delay>
         System.reset();
-   d5130:	f004 fb91 	bl	d9856 <_ZN11SystemClass5resetEv>
-   d5134:	e039      	b.n	d51aa <loop+0x252>
+   d5124:	f004 fb97 	bl	d9856 <_ZN11SystemClass5resetEv>
+   d5128:	e039      	b.n	d519e <loop+0x23e>
       }
       else if (Time.now() - sysStatus.lastHookResponse > 7200L) { //It has been more than two hours since a sucessful hook response
-   d5136:	f004 fd5a 	bl	d9bee <_ZN9TimeClass3nowEv>
-   d513a:	4b23      	ldr	r3, [pc, #140]	; (d51c8 <loop+0x270>)
-   d513c:	4d25      	ldr	r5, [pc, #148]	; (d51d4 <loop+0x27c>)
-   d513e:	69db      	ldr	r3, [r3, #28]
-   d5140:	1ac0      	subs	r0, r0, r3
-   d5142:	f5b0 5fe1 	cmp.w	r0, #7200	; 0x1c20
-   d5146:	d919      	bls.n	d517c <loop+0x224>
-   d5148:	f003 f83e 	bl	d81c8 <spark_cloud_flag_connected>
+   d512a:	f004 fd60 	bl	d9bee <_ZN9TimeClass3nowEv>
+   d512e:	4b26      	ldr	r3, [pc, #152]	; (d51c8 <loop+0x268>)
+   d5130:	4d28      	ldr	r5, [pc, #160]	; (d51d4 <loop+0x274>)
+   d5132:	69db      	ldr	r3, [r3, #28]
+   d5134:	1ac0      	subs	r0, r0, r3
+   d5136:	f5b0 5fe1 	cmp.w	r0, #7200	; 0x1c20
+   d513a:	d919      	bls.n	d5170 <loop+0x210>
+   d513c:	f003 f844 	bl	d81c8 <spark_cloud_flag_connected>
         if (Particle.connected()) publishQueue.publish("State","Error State - Power Cycle", PRIVATE);  // Broadcast Reset Action
-   d514c:	b148      	cbz	r0, d5162 <loop+0x20a>
-   d514e:	4b2a      	ldr	r3, [pc, #168]	; (d51f8 <loop+0x2a0>)
-   d5150:	492c      	ldr	r1, [pc, #176]	; (d5204 <loop+0x2ac>)
+   d5140:	b148      	cbz	r0, d5156 <loop+0x1f6>
+   d5142:	4b2d      	ldr	r3, [pc, #180]	; (d51f8 <loop+0x298>)
+   d5144:	492f      	ldr	r1, [pc, #188]	; (d5204 <loop+0x2a4>)
 }
 
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags(Flag<TagT, ValueT> flag) :
         val_(flag.value()) {
-   d5152:	781b      	ldrb	r3, [r3, #0]
-   d5154:	4829      	ldr	r0, [pc, #164]	; (d51fc <loop+0x2a4>)
+   d5146:	781b      	ldrb	r3, [r3, #0]
+   d5148:	482c      	ldr	r0, [pc, #176]	; (d51fc <loop+0x29c>)
 }
 
 // particle::Flags<TagT, ValueT>
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags() :
         val_(0) {
-   d5156:	2200      	movs	r2, #0
-   d5158:	f88d 2000 	strb.w	r2, [sp]
-   d515c:	4a2b      	ldr	r2, [pc, #172]	; (d520c <loop+0x2b4>)
-   d515e:	f7ff f8bd 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
+   d514a:	2200      	movs	r2, #0
+   d514c:	f88d 2000 	strb.w	r2, [sp]
+   d5150:	4a2e      	ldr	r2, [pc, #184]	; (d520c <loop+0x2ac>)
+   d5152:	f7ff f8c3 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
         delay(2000);
-   d5162:	f44f 60fa 	mov.w	r0, #2000	; 0x7d0
-   d5166:	f003 f90f 	bl	d8388 <delay>
+   d5156:	f44f 60fa 	mov.w	r0, #2000	; 0x7d0
+   d515a:	f003 f915 	bl	d8388 <delay>
         sysStatus.resetCount = 0;                                  // Zero the ResetCount
-   d516a:	2300      	movs	r3, #0
+   d515e:	2300      	movs	r3, #0
         systemStatusWriteNeeded=true;
-   d516c:	2201      	movs	r2, #1
+   d5160:	2201      	movs	r2, #1
         System.reset();
       }
       else if (Time.now() - sysStatus.lastHookResponse > 7200L) { //It has been more than two hours since a sucessful hook response
         if (Particle.connected()) publishQueue.publish("State","Error State - Power Cycle", PRIVATE);  // Broadcast Reset Action
         delay(2000);
         sysStatus.resetCount = 0;                                  // Zero the ResetCount
-   d516e:	6123      	str	r3, [r4, #16]
+   d5162:	6123      	str	r3, [r4, #16]
         systemStatusWriteNeeded=true;
-   d5170:	702a      	strb	r2, [r5, #0]
+   d5164:	702a      	strb	r2, [r5, #0]
         rtc.setAlarm(10);
-   d5172:	210a      	movs	r1, #10
-   d5174:	4826      	ldr	r0, [pc, #152]	; (d5210 <loop+0x2b8>)
-   d5176:	f001 f984 	bl	d6482 <_ZN8MCP794108setAlarmEibi>
-   d517a:	e016      	b.n	d51aa <loop+0x252>
-   d517c:	f003 f824 	bl	d81c8 <spark_cloud_flag_connected>
+   d5166:	210a      	movs	r1, #10
+   d5168:	4829      	ldr	r0, [pc, #164]	; (d5210 <loop+0x2b0>)
+   d516a:	f001 f98a 	bl	d6482 <_ZN8MCP794108setAlarmEibi>
+   d516e:	e016      	b.n	d519e <loop+0x23e>
+   d5170:	f003 f82a 	bl	d81c8 <spark_cloud_flag_connected>
       }
       else {                                                          // If we have had 3 resets - time to do something more
         if (Particle.connected()) publishQueue.publish("State","Error State - Full Modem Reset", PRIVATE);            // Brodcase Reset Action
-   d5180:	b148      	cbz	r0, d5196 <loop+0x23e>
-   d5182:	4b1d      	ldr	r3, [pc, #116]	; (d51f8 <loop+0x2a0>)
-   d5184:	491f      	ldr	r1, [pc, #124]	; (d5204 <loop+0x2ac>)
+   d5174:	b148      	cbz	r0, d518a <loop+0x22a>
+   d5176:	4b20      	ldr	r3, [pc, #128]	; (d51f8 <loop+0x298>)
+   d5178:	4922      	ldr	r1, [pc, #136]	; (d5204 <loop+0x2a4>)
 }
 
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags(Flag<TagT, ValueT> flag) :
         val_(flag.value()) {
-   d5186:	781b      	ldrb	r3, [r3, #0]
-   d5188:	481c      	ldr	r0, [pc, #112]	; (d51fc <loop+0x2a4>)
+   d517a:	781b      	ldrb	r3, [r3, #0]
+   d517c:	481f      	ldr	r0, [pc, #124]	; (d51fc <loop+0x29c>)
 }
 
 // particle::Flags<TagT, ValueT>
 template<typename TagT, typename ValueT>
 inline particle::Flags<TagT, ValueT>::Flags() :
         val_(0) {
-   d518a:	2200      	movs	r2, #0
-   d518c:	f88d 2000 	strb.w	r2, [sp]
-   d5190:	4a20      	ldr	r2, [pc, #128]	; (d5214 <loop+0x2bc>)
-   d5192:	f7ff f8a3 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
+   d517e:	2200      	movs	r2, #0
+   d5180:	f88d 2000 	strb.w	r2, [sp]
+   d5184:	4a23      	ldr	r2, [pc, #140]	; (d5214 <loop+0x2b4>)
+   d5186:	f7ff f8a9 	bl	d42dc <_ZN21PublishQueueAsyncBase7publishEPKcS1_N8particle5FlagsI15PublishFlagTypehEES5_>
         delay(2000);
-   d5196:	f44f 60fa 	mov.w	r0, #2000	; 0x7d0
-   d519a:	f003 f8f5 	bl	d8388 <delay>
+   d518a:	f44f 60fa 	mov.w	r0, #2000	; 0x7d0
+   d518e:	f003 f8fb 	bl	d8388 <delay>
         sysStatus.resetCount = 0;                                     // Zero the ResetCount
-   d519e:	2300      	movs	r3, #0
-   d51a0:	6123      	str	r3, [r4, #16]
+   d5192:	2300      	movs	r3, #0
+   d5194:	6123      	str	r3, [r4, #16]
         systemStatusWriteNeeded=true;
-   d51a2:	2301      	movs	r3, #1
-   d51a4:	702b      	strb	r3, [r5, #0]
+   d5196:	2301      	movs	r3, #1
+   d5198:	702b      	strb	r3, [r5, #0]
         fullModemReset();                                             // Full Modem reset and reboots
-   d51a6:	f7ff fc15 	bl	d49d4 <_Z14fullModemResetv>
+   d519a:	f7ff fc1f 	bl	d49dc <_Z14fullModemResetv>
       }
     }
     break;
   }
   rtc.loop();                                                         // keeps the clock up to date
-   d51aa:	4819      	ldr	r0, [pc, #100]	; (d5210 <loop+0x2b8>)
+   d519e:	481c      	ldr	r0, [pc, #112]	; (d5210 <loop+0x2b0>)
   //sensorDetect = steadyCountTest();                                     // Comment out to cause the device to run through a series of tests
   
 }
-   d51ac:	b002      	add	sp, #8
-   d51ae:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
+   d51a0:	b002      	add	sp, #8
+   d51a2:	e8bd 4070 	ldmia.w	sp!, {r4, r5, r6, lr}
         fullModemReset();                                             // Full Modem reset and reboots
       }
     }
     break;
   }
   rtc.loop();                                                         // keeps the clock up to date
-   d51b2:	f001 b89f 	b.w	d62f4 <_ZN8MCP794104loopEv>
+   d51a6:	f001 b8a5 	b.w	d62f4 <_ZN8MCP794104loopEv>
+    if (currentCountsWriteNeeded) {
+      fram.put(FRAM::currentCountsAddr,current);
+      currentCountsWriteNeeded = false;
+    }
+    if ((Time.minute() % sysStatus.sampleIntervalMin == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;   // sub hourly interval
+    else if ((Time.minute() == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;           //  on hourly interval
+   d51aa:	f004 fd31 	bl	d9c10 <_ZN9TimeClass6minuteEv>
+   d51ae:	2800      	cmp	r0, #0
+   d51b0:	d1f5      	bne.n	d519e <loop+0x23e>
+   d51b2:	f004 fd2d 	bl	d9c10 <_ZN9TimeClass6minuteEv>
+   d51b6:	4b0b      	ldr	r3, [pc, #44]	; (d51e4 <loop+0x284>)
+   d51b8:	681b      	ldr	r3, [r3, #0]
+   d51ba:	4298      	cmp	r0, r3
+   d51bc:	d0ef      	beq.n	d519e <loop+0x23e>
     }
     if (currentCountsWriteNeeded) {
       fram.put(FRAM::currentCountsAddr,current);
       currentCountsWriteNeeded = false;
     }
-    if ((Time.minute() == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;           //  on hourly interval
-   d51b6:	2303      	movs	r3, #3
-   d51b8:	7023      	strb	r3, [r4, #0]
-   d51ba:	e708      	b.n	d4fce <loop+0x76>
     if ((Time.minute() % sysStatus.sampleIntervalMin == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;   // sub hourly interval
-   d51bc:	2303      	movs	r3, #3
-   d51be:	7023      	strb	r3, [r4, #0]
-   d51c0:	e7f3      	b.n	d51aa <loop+0x252>
-   d51c2:	bf00      	nop
+   d51be:	2303      	movs	r3, #3
+   d51c0:	7023      	strb	r3, [r4, #0]
+   d51c2:	e7ec      	b.n	d519e <loop+0x23e>
    d51c4:	2003df59 	.word	0x2003df59
    d51c8:	2003e04c 	.word	0x2003e04c
    d51cc:	2003df40 	.word	0x2003df40
@@ -3503,9 +3508,9 @@ inline particle::Flags<TagT, ValueT>::Flags() :
 void loadSystemDefaults() {                                         // Default settings for the device - connected, not-low power and always on
    d5218:	b507      	push	{r0, r1, r2, lr}
   connectToParticle();                                              // Get connected to Particle - sets sysStatus.connectedStatus to true
-   d521a:	f7ff fb23 	bl	d4864 <_Z17connectToParticlev>
+   d521a:	f7ff fb27 	bl	d486c <_Z17connectToParticlev>
   takeMeasurements();                                               // Need information to set value here - sets sysStatus.stateOfCharge
-   d521e:	f7ff fe1d 	bl	d4e5c <_Z16takeMeasurementsv>
+   d521e:	f7ff fe21 	bl	d4e64 <_Z16takeMeasurementsv>
    d5222:	f002 ffd1 	bl	d81c8 <spark_cloud_flag_connected>
   if (Particle.connected()) publishQueue.publish("Mode","Loading System Defaults", PRIVATE);
    d5226:	b148      	cbz	r0, d523c <_Z18loadSystemDefaultsv+0x24>
@@ -3605,7 +3610,7 @@ void checkSystemValues() {                                          // Checks to
 
 void checkSystemValues() {                                          // Checks to ensure that all system values are in reasonable range
   takeMeasurements();                                               // Sets the sysStatus.stateOfCharge
-   d528e:	f7ff fde5 	bl	d4e5c <_Z16takeMeasurementsv>
+   d528e:	f7ff fde9 	bl	d4e64 <_Z16takeMeasurementsv>
   if (sysStatus.metricUnits < 0 || sysStatus.metricUnits >1) sysStatus.metricUnits = 0;
    d5292:	78a3      	ldrb	r3, [r4, #2]
    d5294:	2b01      	cmp	r3, #1
@@ -3792,7 +3797,7 @@ void setup()                                        // Note: Disconnected Setup(
    d5386:	f004 fe6a 	bl	da05e <digitalWrite>
 
   petWatchdog();                                    // Pet the watchdog - This will reset the watchdog time period
-   d538a:	f7ff fa09 	bl	d47a0 <_Z11petWatchdogv>
+   d538a:	f7ff fa0d 	bl	d47a8 <_Z11petWatchdogv>
   attachInterrupt(wakeUpPin, watchdogISR, RISING);  // The watchdog timer will signal us and we have to respond
    d538e:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
    d5392:	2201      	movs	r2, #1
@@ -4074,7 +4079,7 @@ void setup()                                        // Note: Disconnected Setup(
    d5506:	f000 fdcd 	bl	d60a4 <_ZNK8MCP7941010getRTCTimeEv>
    d550a:	f004 fa8f 	bl	d9a2c <_ZN9TimeClass7setTimeEl>
   DSTRULES() ? Time.beginDST() : Time.endDST();    // Perform the DST calculation here
-   d550e:	f7ff fac5 	bl	d4a9c <_Z8isDSTusav>
+   d550e:	f7ff fac9 	bl	d4aa4 <_Z8isDSTusav>
    d5512:	b110      	cbz	r0, d551a <setup+0x1ca>
    d5514:	f004 fa7a 	bl	d9a0c <_ZN9TimeClass8beginDSTEv>
    d5518:	e001      	b.n	d551e <setup+0x1ce>
@@ -4110,7 +4115,7 @@ void setup()                                        // Note: Disconnected Setup(
    d5560:	6018      	str	r0, [r3, #0]
 
   setPowerConfig();                                                    // Executes commands that set up the Power configuration between Solar and DC-Powered
-   d5562:	f7ff f94f 	bl	d4804 <_Z14setPowerConfigv>
+   d5562:	f7ff f953 	bl	d480c <_Z14setPowerConfigv>
 
   if (!digitalRead(userSwitch)) loadSystemDefaults();                 // Make sure the device wakes up and connects
    d5566:	2004      	movs	r0, #4
@@ -4165,7 +4170,7 @@ void setup()                                        // Note: Disconnected Setup(
   // Here is where the code diverges based on why we are running Setup()
  
   connectToParticle();
-   d55b2:	f7ff f957 	bl	d4864 <_Z17connectToParticlev>
+   d55b2:	f7ff f95b 	bl	d486c <_Z17connectToParticlev>
   
   if (state == INITIALIZATION_STATE) state = IDLE_STATE;              // IDLE unless otherwise from above code
    d55b6:	783b      	ldrb	r3, [r7, #0]
@@ -4243,7 +4248,7 @@ void setup()                                        // Note: Disconnected Setup(
    d5660:	000dcdb5 	.word	0x000dcdb5
    d5664:	000d4469 	.word	0x000d4469
    d5668:	000dcdc2 	.word	0x000dcdc2
-   d566c:	000d4ae1 	.word	0x000d4ae1
+   d566c:	000d4ae9 	.word	0x000d4ae9
    d5670:	000dcdcf 	.word	0x000dcdcf
    d5674:	000d4581 	.word	0x000d4581
    d5678:	000dcddd 	.word	0x000dcddd
