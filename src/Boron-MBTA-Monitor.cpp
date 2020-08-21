@@ -18,7 +18,8 @@
 //v2 -  First demo release - works and sends data to Ubidots via Webhook 
 //v2.01 - Fix for doulbe send
 //v2.02 - Update for WebHook and Moved to degrees F
-//v2.03 - Shorted Webhook name and fixed temp labeling
+//v2.03 - Shortened Webhook name and fixed temp labeling
+//v2.04 - Updated to make it more clear what the sample interval is
 
 
 // Particle Product definitions
@@ -50,11 +51,11 @@ void dailyCleanup();
 int setDSTOffset(String command);
 int setSampleInterval(String command);
 bool isDSTusa();
-#line 19 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
+#line 20 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
 PRODUCT_ID(11743);                                  // Boron Connected Counter Header
 PRODUCT_VERSION(2);
 #define DSTRULES isDSTusa
-char currentPointRelease[5] ="2.03";
+char currentPointRelease[5] ="2.04";
 
 namespace FRAM {                                    // Moved to namespace instead of #define to limit scope
   enum Addresses {
@@ -152,8 +153,9 @@ volatile bool watchdogFlag;                         // Flag to let us know we ne
 char SignalString[64];                              // Used to communicate Wireless RSSI and Description
 char batteryContextStr[16];                         // Tracks the battery context
 char cabinTempStr[12] = "Null";                     // Temperature in the cabin
-char ventTempStr[12] = "Null";                     // Temperature of the air coming out of the AC vent
-char outsideTempStr[12] = "Null";                  // Outdoor air temperature
+char ventTempStr[12] = "Null";                      // Temperature of the air coming out of the AC vent
+char outsideTempStr[12] = "Null";                   // Outdoor air temperature
+char sampleIntervalStr[12] = "Null";                // Test for sample Interval
 bool systemStatusWriteNeeded = false;               // Keep track of when we need to write
 bool currentCountsWriteNeeded = false;
 bool dataInFlight = false;
@@ -191,7 +193,7 @@ void setup()                                        // Note: Disconnected Setup(
   Particle.subscribe(responseTopic, UbidotsHandler, MY_DEVICES);      // Subscribe to the integration response event
 
   Particle.variable("Signal", SignalString);
-  Particle.variable("SampleInterval",sysStatus.sampleIntervalMin);
+  Particle.variable("SampleInterval",sampleIntervalStr);
   Particle.variable("ResetCount", sysStatus.resetCount);
   Particle.variable("CabinTemp",cabinTempStr);
   Particle.variable("VentTemp",ventTempStr);
@@ -208,7 +210,7 @@ void setup()                                        // Note: Disconnected Setup(
   Particle.function("Verbose-Mode",setverboseMode);
   Particle.function("Set-Timezone",setTimeZone);
   Particle.function("Set-DSTOffset",setDSTOffset);
-  Particle.function("SampleRate",setSampleInterval);
+  Particle.function("SampleInterval",setSampleInterval);
 
   // Load FRAM and reset variables to their correct values
   fram.begin();                                                       // Initialize the FRAM module
@@ -230,6 +232,8 @@ void setup()                                        // Note: Disconnected Setup(
     sysStatus.resetCount++;
     systemStatusWriteNeeded = true;                                    // If so, store incremented number - watchdog must have done This
   }
+
+  snprintf(sampleIntervalStr, sizeof(sampleIntervalStr),"%i minutes", sysStatus.sampleIntervalMin);
 
   rtc.setup();                                                        // Start the real time clock
   rtc.clearAlarm();                                                   // Ensures alarm is still not set from last cycle
@@ -364,7 +368,6 @@ void sendEvent() {
   char data[256];                                                     // Store the date in this character array - not global
   snprintf(data, sizeof(data), "{\"cabinT\":%4.2f, \"ventT\":%4.2f, \"outsideT\":%4.2f, \"battery\":%i,  \"key1\":\"%s\", \"resets\":%i, \"alerts\":%i, \"timestamp\":%lu000, \"lat\":%f, \"lng\":%f}",current.tempArray[0], current.tempArray[1], current.tempArray[2],sysStatus.stateOfCharge, batteryContextStr, sysStatus.resetCount, current.alertCount, Time.now(), current.latitude, current.longitude);
   publishQueue.publish("Ubidots-MBTA-Hook-v2", data, PRIVATE);
-  //publishQueue.publish("Ubidots-MBTA-Hook-v2-Parse", data, PRIVATE);
   dataInFlight = true;                                                // set the data inflight flag
   webhookTimeStamp = millis();
   currentHourlyPeriod = Time.hour();
@@ -487,6 +490,7 @@ void loadSystemDefaults() {                                         // Default s
   sysStatus.verboseMode = true;
   if (sysStatus.stateOfCharge < 30) sysStatus.lowBatteryMode = true;
   else sysStatus.lowBatteryMode = false;
+  sysStatus.sampleIntervalMin = 10;                                 // Default reading every 10 minutes
   sysStatus.timezone = -5;                                          // Default is East Coast Time
   sysStatus.dstOffset = 1;
   fram.put(FRAM::systemStatusAddr,sysStatus);                       // Write it now since this is a big deal and I don't want values over written
@@ -683,6 +687,7 @@ int setSampleInterval(String command) {                                      // 
   if ((tempSampleInterval <= 0) | (tempSampleInterval > 60)) return 0;              // Make sure it falls in a valid range or send a "fail" result
   sysStatus.sampleIntervalMin = tempSampleInterval;
   systemStatusWriteNeeded = true;
+  snprintf(sampleIntervalStr, sizeof(sampleIntervalStr),"%i minutes", sysStatus.sampleIntervalMin);
   snprintf(data, sizeof(data), "Sample Interval is now %i minutes",sysStatus.sampleIntervalMin);
   if (Particle.connected()) {
     publishQueue.publish("Interval", data, PRIVATE);
