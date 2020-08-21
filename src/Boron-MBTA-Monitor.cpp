@@ -17,6 +17,8 @@
 //v1 -  Just seeing if I can talk to the temperature sensor and GPS sensor to work
 //v2 -  First demo release - works and sends data to Ubidots via Webhook 
 //v2.01 - Fix for doulbe send
+//v2.02 - Update for WebHook and Moved to degrees F
+//v2.03 - Shorted Webhook name and fixed temp labeling
 
 
 // Particle Product definitions
@@ -48,11 +50,11 @@ void dailyCleanup();
 int setDSTOffset(String command);
 int setSampleInterval(String command);
 bool isDSTusa();
-#line 17 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
+#line 19 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
 PRODUCT_ID(11743);                                  // Boron Connected Counter Header
 PRODUCT_VERSION(2);
 #define DSTRULES isDSTusa
-char currentPointRelease[5] ="2.01";
+char currentPointRelease[5] ="2.03";
 
 namespace FRAM {                                    // Moved to namespace instead of #define to limit scope
   enum Addresses {
@@ -361,7 +363,8 @@ void loop()
 void sendEvent() {
   char data[256];                                                     // Store the date in this character array - not global
   snprintf(data, sizeof(data), "{\"cabinT\":%4.2f, \"ventT\":%4.2f, \"outsideT\":%4.2f, \"battery\":%i,  \"key1\":\"%s\", \"resets\":%i, \"alerts\":%i, \"timestamp\":%lu000, \"lat\":%f, \"lng\":%f}",current.tempArray[0], current.tempArray[1], current.tempArray[2],sysStatus.stateOfCharge, batteryContextStr, sysStatus.resetCount, current.alertCount, Time.now(), current.latitude, current.longitude);
-  publishQueue.publish("Ubidots-MBTA-Hook-v1", data, PRIVATE);
+  publishQueue.publish("Ubidots-MBTA-Hook-v2", data, PRIVATE);
+  //publishQueue.publish("Ubidots-MBTA-Hook-v2-Parse", data, PRIVATE);
   dataInFlight = true;                                                // set the data inflight flag
   webhookTimeStamp = millis();
   currentHourlyPeriod = Time.hour();
@@ -396,9 +399,9 @@ void takeMeasurements()
     float temp = getTemp(sensorAddresses[i]);
     if (!isnan(temp)) current.tempArray[i] = temp;
   }
-  snprintf(cabinTempStr, sizeof(cabinTempStr),"%4.2f C", current.tempArray[0]);
-  snprintf(ventTempStr, sizeof(ventTempStr),"%4.2f C", current.tempArray[1]);
-  snprintf(outsideTempStr, sizeof(outsideTempStr),"%4.2f C", current.tempArray[2]);
+  snprintf(cabinTempStr, sizeof(cabinTempStr),"%4.2f F", current.tempArray[0]);
+  snprintf(ventTempStr, sizeof(ventTempStr),"%4.2f F", current.tempArray[1]);
+  snprintf(outsideTempStr, sizeof(outsideTempStr),"%4.2f F", current.tempArray[2]);
   getBatteryContext();                                                // What is the battery up to?
   sysStatus.stateOfCharge = int(System.batteryCharge());             // Percentage of full charge
   systemStatusWriteNeeded=true;
@@ -414,7 +417,7 @@ double getTemp(uint8_t addr[8]) {
   } while (!ds18b20.crcCheck() && MAXRETRY > i++);
 
   if (i < MAXRETRY) {
-    //_temp = ds18b20.convertToFahrenheit(_temp);
+    _temp = ds18b20.convertToFahrenheit(_temp);
     Serial.println(_temp);
   }
   else {
