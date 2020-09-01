@@ -20,6 +20,7 @@
 //v2.02 - Update for WebHook and Moved to degrees F
 //v2.03 - Shortened Webhook name and fixed temp labeling
 //v2.04 - Updated to make it more clear what the sample interval is
+//v3.00 - Added logic for low power battery mode
 
 
 // Particle Product definitions
@@ -51,11 +52,11 @@ void dailyCleanup();
 int setDSTOffset(String command);
 int setSampleInterval(String command);
 bool isDSTusa();
-#line 20 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
+#line 21 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
 PRODUCT_ID(11743);                                  // Boron Connected Counter Header
 PRODUCT_VERSION(2);
 #define DSTRULES isDSTusa
-char currentPointRelease[5] ="2.04";
+char currentPointRelease[5] ="3.00";
 
 namespace FRAM {                                    // Moved to namespace instead of #define to limit scope
   enum Addresses {
@@ -147,6 +148,7 @@ unsigned long resetTimeStamp = 0;                   // Resets - this keeps you f
 char currentOffsetStr[10];                          // What is our offset from UTC
 int currentHourlyPeriod = 0;                        // Need to keep this separate from time so we know when to report
 int currentMinutePeriod = 0;                        // Makes sure we don't go into reporting too many times
+unsigned long lastTimePowered = 0;                  // Keep track of how long we are running on battery power
 
 // Program Variables
 volatile bool watchdogFlag;                         // Flag to let us know we need to pet the dog
@@ -228,6 +230,8 @@ void setup()                                        // Note: Disconnected Setup(
 
   checkSystemValues();                                                // Make sure System values are all in valid range
 
+  getBatteryContext();                                                // See if we have enought juice
+
   if (System.resetReason() == RESET_REASON_PIN_RESET || System.resetReason() == RESET_REASON_USER) { // Check to see if we are starting from a pin reset or a reset in the sketch
     sysStatus.resetCount++;
     systemStatusWriteNeeded = true;                                    // If so, store incremented number - watchdog must have done This
@@ -250,7 +254,7 @@ void setup()                                        // Note: Disconnected Setup(
 
   setPowerConfig();                                                    // Executes commands that set up the Power configuration between Solar and DC-Powered
 
-  if (!digitalRead(userSwitch)) loadSystemDefaults();                 // Make sure the device wakes up and connects
+  if (!digitalRead(userSwitch)) loadSystemDefaults();                  // Make sure the device wakes up and connects
 
   ds18b20.resetsearch();                 // initialise for sensor search
   for (int i = 0; i < nSENSORS; i++) {   // try to read the sensor addresses
@@ -291,15 +295,18 @@ void loop()
     }
     if ((Time.minute() % sysStatus.sampleIntervalMin == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;   // sub hourly interval
     else if ((Time.minute() == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;           //  on hourly interval
+
+    if (sysStatus.lowBatteryMode) state = SLEEPING_STATE;
+
     break;
 
   case SLEEPING_STATE: {                                              // This state is triggered once the park closes and runs until it opens
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
-    if (sysStatus.connectedStatus) disconnectFromParticle();          // Disconnect cleanly from Particle
-    digitalWrite(blueLED,LOW);                                        // Turn off the LED
-    petWatchdog();
-    int wakeInSeconds = constrain(sysStatus.sampleIntervalMin * 60  - Time.now() % sysStatus.sampleIntervalMin * 60, 1, sysStatus.sampleIntervalMin * 60);
-    rtc.setAlarm(wakeInSeconds);                                // The Real Time Clock will turn the Enable pin back on to wake the device
+    if (Time.minute() > 1 && sysStatus.connectedStatus) disconnectFromParticle();          // Disconnect cleanly from Particle after the first minute
+      digitalWrite(blueLED,LOW);                                        // Turn off the LED
+      petWatchdog();
+      int wakeInSeconds = constrain((60 - Time.minute()) * 60, 1, 60 * 60);   // Sleep till the top of the hour
+      rtc.setAlarm(wakeInSeconds);                                      // The Real Time Clock will turn the Enable pin back on to wake the device
     } break;
 
   case MEASURING_STATE:
@@ -311,7 +318,7 @@ void loop()
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
     if (!sysStatus.connectedStatus) connectToParticle();              // Only attempt to connect if not already New process to get connected
     if (Particle.connected()) {
-      if (Time.hour() == 0) dailyCleanup();          // Once a day, clean house
+      if (Time.hour() == 0) dailyCleanup();                           // Once a day, clean house
       sendEvent();                                                    // Send data to Ubidots
       state = RESP_WAIT_STATE;                                        // Wait for Response
     }
@@ -367,7 +374,7 @@ void loop()
 void sendEvent() {
   char data[256];                                                     // Store the date in this character array - not global
   snprintf(data, sizeof(data), "{\"cabinT\":%4.2f, \"ventT\":%4.2f, \"outsideT\":%4.2f, \"battery\":%i,  \"key1\":\"%s\", \"resets\":%i, \"alerts\":%i, \"timestamp\":%lu000, \"lat\":%f, \"lng\":%f}",current.tempArray[0], current.tempArray[1], current.tempArray[2],sysStatus.stateOfCharge, batteryContextStr, sysStatus.resetCount, current.alertCount, Time.now(), current.latitude, current.longitude);
-  publishQueue.publish("Ubidots-MBTA-Hook-v2", data, PRIVATE);
+  publishQueue.publish("Ubidots-MBTA-Hook-v2-Parse", data, PRIVATE);
   dataInFlight = true;                                                // set the data inflight flag
   webhookTimeStamp = millis();
   currentHourlyPeriod = Time.hour();
@@ -397,7 +404,7 @@ void takeMeasurements()
 {
   displayInfo();
 
-  if (Cellular.ready()) getSignalStrength();                          // Test signal strength if the cellular modem is on and ready
+  if (Cellular.ready()) getSignalStrength();                        // Test signal strength if the cellular modem is on and ready
   for (int i = 0; i < nSENSORS; i++) {
     float temp = getTemp(sensorAddresses[i]);
     if (!isnan(temp)) current.tempArray[i] = temp;
@@ -405,8 +412,7 @@ void takeMeasurements()
   snprintf(cabinTempStr, sizeof(cabinTempStr),"%4.2f F", current.tempArray[0]);
   snprintf(ventTempStr, sizeof(ventTempStr),"%4.2f F", current.tempArray[1]);
   snprintf(outsideTempStr, sizeof(outsideTempStr),"%4.2f F", current.tempArray[2]);
-  getBatteryContext();                                                // What is the battery up to?
-  sysStatus.stateOfCharge = int(System.batteryCharge());             // Percentage of full charge
+  getBatteryContext();                                               // What is the battery up to?
   systemStatusWriteNeeded=true;
   currentCountsWriteNeeded=true;
 }
@@ -448,10 +454,29 @@ void getSignalStrength() {
 }
 
 void getBatteryContext() {
+
+  static bool alreadyOnBattery = false;                             // Wee need to watch how long we are on battery power
+
+  sysStatus.stateOfCharge = int(System.batteryCharge());             // Percentage of full charge
+
   const char* batteryContext[7] ={"Unknown","Not Charging","Charging","Charged","Discharging","Fault","Diconnected"};
   // Battery conect information - https://docs.particle.io/reference/device-os/firmware/boron/#batterystate-
 
   snprintf(batteryContextStr, sizeof(batteryContextStr),"%s", batteryContext[System.batteryState()]);
+
+  if (!alreadyOnBattery && System.batteryState() == 4) {           // Keep track how long we are on battery power
+    alreadyOnBattery = true;
+    lastTimePowered = millis();
+  }
+  else if (System.batteryState() == 2 || System.batteryState() == 3) {    // If charged or charging
+    alreadyOnBattery = false;
+    lastTimePowered = millis();
+  }
+
+  if (millis() - lastTimePowered > 14400000 || sysStatus.stateOfCharge <= 60) {                      // If we have been on battery for four hours, or the battery is less than 60%
+    sysStatus.lowBatteryMode = true;
+  } 
+  else sysStatus.lowBatteryMode = false;
 
 }
 
@@ -510,6 +535,7 @@ void checkSystemValues() {                                          // Checks to
   if (sysStatus.resetCount < 0 || sysStatus.resetCount > 255) sysStatus.resetCount = 0;
   if (sysStatus.timezone < -12 || sysStatus.timezone > 12) sysStatus.timezone = -5;
   if (sysStatus.dstOffset < 0 || sysStatus.dstOffset > 2) sysStatus.dstOffset = 1;
+  sysStatus.sampleIntervalMin = 10;                                 // Default reading every 10 minutes
   // None for lastHookResponse
 
   systemStatusWriteNeeded = true;
