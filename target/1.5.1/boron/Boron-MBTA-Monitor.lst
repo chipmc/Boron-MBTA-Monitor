@@ -4454,7 +4454,7 @@ struct __ApplicationProductVersion {
    d5798:	f004 fd14 	bl	da1c4 <spark_protocol_instance>
    d579c:	4622      	mov	r2, r4
    d579e:	4623      	mov	r3, r4
-   d57a0:	2104      	movs	r1, #4
+   d57a0:	2105      	movs	r1, #5
    d57a2:	f004 fd1f 	bl	da1e4 <spark_protocol_set_product_firmware_version>
     WAKEUP_REASON_PIN_OR_RTC = 3,
     WAKEUP_REASON_UNKNOWN = 4

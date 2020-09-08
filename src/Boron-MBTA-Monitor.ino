@@ -22,7 +22,7 @@
 
 // Particle Product definitions
 PRODUCT_ID(11743);                                  // Boron Connected Counter Header
-PRODUCT_VERSION (4);
+PRODUCT_VERSION (5);
 #define DSTRULES isDSTusa
 char currentPointRelease[5] ="5.00";
 
