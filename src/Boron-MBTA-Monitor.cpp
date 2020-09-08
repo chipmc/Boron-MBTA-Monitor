@@ -21,6 +21,9 @@
 //v2.03 - Shortened Webhook name and fixed temp labeling
 //v2.04 - Updated to make it more clear what the sample interval is
 //v3.00 - Added logic for low power battery mode
+//v4.00 - Implemented fix for device not coming out of lowBattery mode
+//v4.01 - Updated with the Boron not charging fix
+//v4.02 - Fixed the timeout on the battery context and back to 4 hours
 
 
 // Particle Product definitions
@@ -52,11 +55,11 @@ void dailyCleanup();
 int setDSTOffset(String command);
 int setSampleInterval(String command);
 bool isDSTusa();
-#line 21 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
+#line 24 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
 PRODUCT_ID(11743);                                  // Boron Connected Counter Header
-PRODUCT_VERSION(2);
+PRODUCT_VERSION (4);
 #define DSTRULES isDSTusa
-char currentPointRelease[5] ="3.00";
+char currentPointRelease[5] ="4.02";
 
 namespace FRAM {                                    // Moved to namespace instead of #define to limit scope
   enum Addresses {
@@ -122,6 +125,8 @@ retained uint8_t publishQueueRetainedBuffer[2048];
 PublishQueueAsync publishQueue(publishQueueRetainedBuffer, sizeof(publishQueueRetainedBuffer));
 DS18B20 ds18b20(tempSensors);
 AssetTracker t;
+PMIC pmic;
+
 
 void displayInfo(); // forward declaration
 
@@ -214,6 +219,9 @@ void setup()                                        // Note: Disconnected Setup(
   Particle.function("Set-DSTOffset",setDSTOffset);
   Particle.function("SampleInterval",setSampleInterval);
 
+  pmic.enableBuck();                                                  // To enable charging 
+
+
   // Load FRAM and reset variables to their correct values
   fram.begin();                                                       // Initialize the FRAM module
 
@@ -293,15 +301,19 @@ void loop()
       fram.put(FRAM::currentCountsAddr,current);
       currentCountsWriteNeeded = false;
     }
+    if (sysStatus.lowBatteryMode) state = SLEEPING_STATE;
     if ((Time.minute() % sysStatus.sampleIntervalMin == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;   // sub hourly interval
     else if ((Time.minute() == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;           //  on hourly interval
-
-    if (sysStatus.lowBatteryMode) state = SLEEPING_STATE;
 
     break;
 
   case SLEEPING_STATE: {                                              // This state is triggered once the park closes and runs until it opens
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
+    getBatteryContext();                                              // Check to make sure we should still be in the low battery state
+    if (!sysStatus.lowBatteryMode) {                                  // If not, we need to exit this state and go back to IDLE_STATE
+      state = IDLE_STATE;
+      break;
+    }
     if (Time.minute() > 1 && sysStatus.connectedStatus) disconnectFromParticle();          // Disconnect cleanly from Particle after the first minute
       digitalWrite(blueLED,LOW);                                        // Turn off the LED
       petWatchdog();
@@ -455,25 +467,24 @@ void getSignalStrength() {
 
 void getBatteryContext() {
 
-  static bool alreadyOnBattery = false;                             // Wee need to watch how long we are on battery power
+  static bool alreadyOnBattery = false;                                           // Wee need to watch how long we are on battery power
 
-  sysStatus.stateOfCharge = int(System.batteryCharge());             // Percentage of full charge
+  sysStatus.stateOfCharge = int(System.batteryCharge());                          // Percentage of full charge
 
-  const char* batteryContext[7] ={"Unknown","Not Charging","Charging","Charged","Discharging","Fault","Diconnected"};
+  const char* batteryContext[7] ={"Unknown","Not Charging","Charging","On Vehicle Pwr","Off Vehicle Pwr","Fault","Diconnected"};
   // Battery conect information - https://docs.particle.io/reference/device-os/firmware/boron/#batterystate-
 
   snprintf(batteryContextStr, sizeof(batteryContextStr),"%s", batteryContext[System.batteryState()]);
 
-  if (!alreadyOnBattery && System.batteryState() == 4) {           // Keep track how long we are on battery power
+  if (!alreadyOnBattery && System.batteryState() == 4) {                          // Keep track how long we are on battery power
     alreadyOnBattery = true;
-    lastTimePowered = millis();
   }
-  else if (System.batteryState() == 2 || System.batteryState() == 3) {    // If charged or charging
+  else if (System.batteryState() == 2 || System.batteryState() == 3) {            // If charged or charging
     alreadyOnBattery = false;
     lastTimePowered = millis();
   }
 
-  if (millis() - lastTimePowered > 14400000 || sysStatus.stateOfCharge <= 60) {                      // If we have been on battery for four hours, or the battery is less than 60%
+  if (millis() - lastTimePowered > 14400000 || sysStatus.stateOfCharge <= 50) {    // If we have been on battery for four hours, or the battery is less than 50%
     sysStatus.lowBatteryMode = true;
   } 
   else sysStatus.lowBatteryMode = false;
