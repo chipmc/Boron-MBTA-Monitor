@@ -17,14 +17,14 @@
 //v3.00 - Added logic for low power battery mode
 //v4.00 - Implemented fix for device not coming out of lowBattery mode
 //v4.01 - Updated with the Boron not charging fix
-//v4.02 - Fixed the timeout on the battery context and back to 4 hours
+//v5.00 - Fixed the timeout on the battery context and back to 4 hours
 
 
 // Particle Product definitions
 PRODUCT_ID(11743);                                  // Boron Connected Counter Header
 PRODUCT_VERSION (4);
 #define DSTRULES isDSTusa
-char currentPointRelease[5] ="4.02";
+char currentPointRelease[5] ="5.00";
 
 namespace FRAM {                                    // Moved to namespace instead of #define to limit scope
   enum Addresses {
