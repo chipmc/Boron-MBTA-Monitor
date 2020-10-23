@@ -18,13 +18,16 @@
 //v4.00 - Implemented fix for device not coming out of lowBattery mode
 //v4.01 - Updated with the Boron not charging fix
 //v5.00 - Fixed the timeout on the battery context and back to 4 hours
+//v6.00 - Updated to the new deviceOS@2.0.0-rc2 - removed old PMIC fix
+//v7.00 - Minor fixes
+//v8.00 - updated to deviceOS@2.0.0-rc3 and fixed an ERROR_STATE issue
 
 
 // Particle Product definitions
 PRODUCT_ID(11743);                                  // Boron Connected Counter Header
-PRODUCT_VERSION (5);
+PRODUCT_VERSION (8);
 #define DSTRULES isDSTusa
-char currentPointRelease[5] ="5.00";
+char currentPointRelease[5] ="8.00";
 
 namespace FRAM {                                    // Moved to namespace instead of #define to limit scope
   enum Addresses {
@@ -90,7 +93,6 @@ retained uint8_t publishQueueRetainedBuffer[2048];
 PublishQueueAsync publishQueue(publishQueueRetainedBuffer, sizeof(publishQueueRetainedBuffer));
 DS18B20 ds18b20(tempSensors);
 AssetTracker t;
-PMIC pmic;
 
 
 void displayInfo(); // forward declaration
@@ -184,9 +186,6 @@ void setup()                                        // Note: Disconnected Setup(
   Particle.function("Set-DSTOffset",setDSTOffset);
   Particle.function("SampleInterval",setSampleInterval);
 
-  pmic.enableBuck();                                                  // To enable charging 
-
-
   // Load FRAM and reset variables to their correct values
   fram.begin();                                                       // Initialize the FRAM module
 
@@ -246,6 +245,7 @@ void setup()                                        // Note: Disconnected Setup(
   // Here is where the code diverges based on why we are running Setup()
  
   connectToParticle();
+  publishQueue.publish("State","Startup Complete",PRIVATE);
   
   if (state == INITIALIZATION_STATE) state = IDLE_STATE;              // IDLE unless otherwise from above code
 
@@ -269,7 +269,6 @@ void loop()
     if (sysStatus.lowBatteryMode) state = SLEEPING_STATE;
     if ((Time.minute() % sysStatus.sampleIntervalMin == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;   // sub hourly interval
     else if ((Time.minute() == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;           //  on hourly interval
-
     break;
 
   case SLEEPING_STATE: {                                              // This state is triggered once the park closes and runs until it opens
@@ -277,6 +276,12 @@ void loop()
     getBatteryContext();                                              // Check to make sure we should still be in the low battery state
     if (!sysStatus.lowBatteryMode) {                                  // If not, we need to exit this state and go back to IDLE_STATE
       state = IDLE_STATE;
+      break;
+    }
+    else if (Time.now() - sysStatus.lastHookResponse > 7200L) {       // Troubleshooting code
+      connectToParticle();
+      Particle.publish("State","Stuck in sleep state",PRIVATE);
+      state = REPORTING_STATE;
       break;
     }
     if (Time.minute() > 1 && sysStatus.connectedStatus) disconnectFromParticle();          // Disconnect cleanly from Particle after the first minute
@@ -294,6 +299,7 @@ void loop()
   case REPORTING_STATE:
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
     if (!sysStatus.connectedStatus) connectToParticle();              // Only attempt to connect if not already New process to get connected
+    if (!Particle.connected()) connectToParticle();                   // Just to make sure
     if (Particle.connected()) {
       if (Time.hour() == 0) dailyCleanup();                           // Once a day, clean house
       sendEvent();                                                    // Send data to Ubidots
@@ -329,15 +335,16 @@ void loop()
         if (Particle.connected()) publishQueue.publish("State","Error State - Power Cycle", PRIVATE);  // Broadcast Reset Action
         delay(2000);
         sysStatus.resetCount = 0;                                  // Zero the ResetCount
-        systemStatusWriteNeeded=true;
-        rtc.setAlarm(10);
+        fram.put(FRAM::systemStatusAddr,sysStatus);
+        hardResetNow("1");
       }
       else {                                                          // If we have had 3 resets - time to do something more
-        if (Particle.connected()) publishQueue.publish("State","Error State - Full Modem Reset", PRIVATE);            // Brodcase Reset Action
+        if (Particle.connected()) publishQueue.publish("State","Error State - Power Cycle", PRIVATE);            // Brodcase Reset Action
         delay(2000);
         sysStatus.resetCount = 0;                                     // Zero the ResetCount
-        systemStatusWriteNeeded=true;
-        fullModemReset();                                             // Full Modem reset and reboots
+        fram.put(FRAM::systemStatusAddr,sysStatus);
+        hardResetNow("1");
+        // fullModemReset();                                             // Full Modem reset and reboots
       }
     }
     break;
@@ -570,6 +577,7 @@ int hardResetNow(String command)                                      // Will pe
   if (command == "1")
   {
     publishQueue.publish("Reset","Hard Reset in 2 seconds",PRIVATE);
+    delay(2000);
     rtc.setAlarm(10);
     return 1;                                                         // Unfortunately, this will never be sent
   }
@@ -660,6 +668,7 @@ void dailyCleanup() {                                                 // Called 
   sysStatus.verboseMode = false;
   Particle.syncTime();                                                // Set the clock each day
   waitFor(Particle.syncTimeDone,30000);                               // Wait for up to 30 seconds for the SyncTime to complete
+  sysStatus.resetCount = 0;
   systemStatusWriteNeeded=true;
 }
 
