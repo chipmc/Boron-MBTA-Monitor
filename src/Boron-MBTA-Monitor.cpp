@@ -25,6 +25,8 @@
 //v4.01 - Updated with the Boron not charging fix
 //v5.00 - Fixed the timeout on the battery context and back to 4 hours
 //v6.00 - Updated to the new deviceOS@2.0.0-rc2 - removed old PMIC fix
+//v7.00 - Minor fixes
+//v8.00 - updated to deviceOS@2.0.0-rc3 and fixed an ERROR_STATE issue
 
 
 // Particle Product definitions
@@ -56,11 +58,11 @@ void dailyCleanup();
 int setDSTOffset(String command);
 int setSampleInterval(String command);
 bool isDSTusa();
-#line 25 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
+#line 27 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
 PRODUCT_ID(11743);                                  // Boron Connected Counter Header
-PRODUCT_VERSION (7);
+PRODUCT_VERSION (8);
 #define DSTRULES isDSTusa
-char currentPointRelease[5] ="7.00";
+char currentPointRelease[5] ="8.00";
 
 namespace FRAM {                                    // Moved to namespace instead of #define to limit scope
   enum Addresses {

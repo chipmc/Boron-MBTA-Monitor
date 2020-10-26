@@ -31,11 +31,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  13 .debug_macro  00046ec3  00000000  00000000  002f0302  2**0
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_line   0005bdfa  00000000  00000000  003371c5  2**0
+ 14 .debug_line   0005bdf5  00000000  00000000  003371c5  2**0
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_str    0012789f  00000000  00000000  00392fbf  2**0
+ 15 .debug_str    0012789f  00000000  00000000  00392fba  2**0
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_frame  0000a454  00000000  00000000  004ba860  2**2
+ 16 .debug_frame  0000a454  00000000  00000000  004ba85c  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -3354,7 +3354,7 @@ struct __ApplicationProductVersion {
    d5796:	f004 fb23 	bl	d9de0 <spark_protocol_instance>
    d579a:	4622      	mov	r2, r4
    d579c:	4623      	mov	r3, r4
-   d579e:	2107      	movs	r1, #7
+   d579e:	2108      	movs	r1, #8
    d57a0:	f004 fb2e 	bl	d9e00 <spark_protocol_set_product_firmware_version>
     SleepResult() {}
    d57a4:	4b37      	ldr	r3, [pc, #220]	; (d5884 <_GLOBAL__sub_I___appProductID+0x110>)
