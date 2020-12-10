@@ -21,13 +21,14 @@
 //v6.00 - Updated to the new deviceOS@2.0.0-rc2 - removed old PMIC fix
 //v7.00 - Minor fixes
 //v8.00 - updated to deviceOS@2.0.0-rc3 and fixed an ERROR_STATE issue
+//v9.00 - Update to deviceOS@2.0.0
 
 
 // Particle Product definitions
 PRODUCT_ID(11743);                                  // Boron Connected Counter Header
-PRODUCT_VERSION (8);
+PRODUCT_VERSION (9);
 #define DSTRULES isDSTusa
-char currentPointRelease[5] ="8.00";
+char currentPointRelease[5] ="9.00";
 
 namespace FRAM {                                    // Moved to namespace instead of #define to limit scope
   enum Addresses {
@@ -66,7 +67,6 @@ struct currentCounts_structure {                    // currently 10 bytes long
 #include "3rdGenDevicePinoutdoc.h"                  // Pinout Documentation File
 #include "MCP79410RK.h"                             // Real Time Clock
 #include "MB85RC256V-FRAM-RK.h"                     // Rickkas Particle based FRAM Library
-#include "UnitTestCode.h"                           // This code will exercise the device
 #include "PublishQueueAsyncRK.h"                    // Async Particle Publish
 #include "DS18B20.h"                               // Include the DS18B20 Library
 #include "AssetTrackerRK.h"                         // @Rickkas rewrite of Asset Tracker https://github.com/rickkas7/AssetTrackerRK/
@@ -142,8 +142,6 @@ const int MAXRETRY = 3;
 
 void setup()                                        // Note: Disconnected Setup()
 {
-
-  Serial.begin(9600);
   /* Setup is run for three reasons once we deploy a sensor:
        1) When you deploy the sensor
        2) Each hour while the device is sleeping
@@ -202,7 +200,7 @@ void setup()                                        // Note: Disconnected Setup(
 
   checkSystemValues();                                                // Make sure System values are all in valid range
 
-  getBatteryContext();                                                // See if we have enought juice
+  getBatteryContext();                                                // See if we have enough juice
 
   if (System.resetReason() == RESET_REASON_PIN_RESET || System.resetReason() == RESET_REASON_USER) { // Check to see if we are starting from a pin reset or a reset in the sketch
     sysStatus.resetCount++;
@@ -243,7 +241,6 @@ void setup()                                        // Note: Disconnected Setup(
 
 
   // Here is where the code diverges based on why we are running Setup()
- 
   connectToParticle();
   publishQueue.publish("State","Startup Complete",PRIVATE);
   
@@ -258,14 +255,6 @@ void loop()
   case IDLE_STATE:                                                    // Where we spend most time - note, the order of these conditionals is important
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
     if (watchdogFlag) petWatchdog();                                  // Watchdog flag is raised - time to pet the watchdog
-    if (systemStatusWriteNeeded) {
-      fram.put(FRAM::systemStatusAddr,sysStatus);
-      systemStatusWriteNeeded = false;
-    }
-    if (currentCountsWriteNeeded) {
-      fram.put(FRAM::currentCountsAddr,current);
-      currentCountsWriteNeeded = false;
-    }
     if (sysStatus.lowBatteryMode) state = SLEEPING_STATE;
     if ((Time.minute() % sysStatus.sampleIntervalMin == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;   // sub hourly interval
     else if ((Time.minute() == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;           //  on hourly interval
@@ -350,8 +339,14 @@ void loop()
     break;
   }
   rtc.loop();                                                         // keeps the clock up to date
-  //sensorDetect = steadyCountTest();                                     // Comment out to cause the device to run through a series of tests
-  
+  if (systemStatusWriteNeeded) {
+    fram.put(FRAM::systemStatusAddr,sysStatus);
+    systemStatusWriteNeeded = false;
+  }
+  if (currentCountsWriteNeeded) {
+    fram.put(FRAM::currentCountsAddr,current);
+    currentCountsWriteNeeded = false;
+  }
 }
 
 
@@ -411,12 +406,8 @@ double getTemp(uint8_t addr[8]) {
 
   if (i < MAXRETRY) {
     _temp = ds18b20.convertToFahrenheit(_temp);
-    Serial.println(_temp);
   }
-  else {
-    _temp = NAN;
-    Serial.println("Invalid reading");
-  }
+  else _temp = NAN;
 
   return _temp;
 }
@@ -646,7 +637,6 @@ void publishStateTransition(void)
   snprintf(stateTransitionString, sizeof(stateTransitionString), "From %s to %s", stateNames[oldState],stateNames[state]);
   oldState = state;
   if(Particle.connected()) publishQueue.publish("State Transition",stateTransitionString, PRIVATE);
-  Serial.println(stateTransitionString);
 }
 
 void fullModemReset() {  // Adapted form Rikkas7's https://github.com/rickkas7/electronsample

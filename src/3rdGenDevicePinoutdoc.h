@@ -8,12 +8,12 @@
  * D19 - A0 -
  * D18 - A1 -
  * D17 - A2 -
- * D16 - A3 -
+ * D16 - A3 -               DS18B20 Temp Sensors x3
  * D15 - A4 -               TMP32 Temp Sensor
- * D14 - A5 / SPI SS -      disableModule
- * D13 - SCK - SPI Clock -  intPin
+ * D14 - A5 / SPI SS -     
+ * D13 - SCK - SPI Clock -
  * D12 - MO - SPI MOSI -    
- * D11 - MI - SPI MISO -    ledPower
+ * D11 - MI - SPI MISO 
  * D10 - UART RX -
  * D9 - UART TX -
 
@@ -28,7 +28,7 @@
  * D4 -                     User Switch
  * D3 - 
  * D2 - 
- * D1 - SCL - I2C Clock -   FRAM / RTC and I2C Bus
+ * D1 - SCL - I2C Clock -   FRAM / RTC and I2C Bus - and GNSS module
  * D0 - SDA - I2C Data -    FRAM / RTX and I2C Bus
  *
  *
