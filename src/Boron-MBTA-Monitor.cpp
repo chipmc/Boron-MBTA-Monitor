@@ -28,6 +28,7 @@
 //v7.00 - Minor fixes
 //v8.00 - updated to deviceOS@2.0.0-rc3 and fixed an ERROR_STATE issue
 //v9.00 - Update to deviceOS@2.0.0
+//v10.00 - Update to new carrier board v1.5 and deviceOS@2.0.1
 
 
 // Particle Product definitions
@@ -39,8 +40,6 @@ void takeMeasurements();
 double getTemp(uint8_t addr[8]);
 void getSignalStrength();
 void getBatteryContext();
-void watchdogISR();
-void petWatchdog();
 int setPowerConfig();
 void loadSystemDefaults();
 void checkSystemValues();
@@ -48,7 +47,6 @@ bool connectToParticle();
 bool disconnectFromParticle();
 bool notConnected();
 int resetFRAM(String command);
-int hardResetNow(String command);
 int sendNow(String command);
 void resetEverything();
 int setverboseMode(String command);
@@ -59,11 +57,11 @@ void dailyCleanup();
 int setDSTOffset(String command);
 int setSampleInterval(String command);
 bool isDSTusa();
-#line 28 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
+#line 29 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
 PRODUCT_ID(11743);                                  // Boron Connected Counter Header
-PRODUCT_VERSION (9);
+PRODUCT_VERSION (10);
 #define DSTRULES isDSTusa
-char currentPointRelease[5] ="9.00";
+char currentPointRelease[8] ="10.00";
 
 namespace FRAM {                                    // Moved to namespace instead of #define to limit scope
   enum Addresses {
@@ -78,7 +76,7 @@ const int FRAMversionNumber = 1;                    // Increment this number eac
 struct systemStatus_structure {                     // currently 14 bytes long
   uint8_t structuresVersion;                        // Version of the data structures (system and data)
   uint8_t placeholder;                              // available for future use
-  uint8_t metricUnits;                              // Status of key system states
+  uint8_t clockSet;                                 // Tells us if we need to connect and set the RTC
   uint8_t connectedStatus;
   uint8_t verboseMode;
   uint8_t lowBatteryMode;
@@ -100,17 +98,21 @@ struct currentCounts_structure {                    // currently 10 bytes long
 
 // Included Libraries
 #include "3rdGenDevicePinoutdoc.h"                  // Pinout Documentation File
-#include "MCP79410RK.h"                             // Real Time Clock
 #include "MB85RC256V-FRAM-RK.h"                     // Rickkas Particle based FRAM Library
 #include "PublishQueueAsyncRK.h"                    // Async Particle Publish
 #include "DS18B20.h"                               // Include the DS18B20 Library
 #include "AssetTrackerRK.h"                         // @Rickkas rewrite of Asset Tracker https://github.com/rickkas7/AssetTrackerRK/
+#include "AB1805_RK.h"                              // Watchdog and Real Time Clock - https://github.com/rickkas7/AB1805_RK
+
+// This is the maximum amount of time to allow for connecting to cloud. If this time is
+// exceeded, do a deep power down. This should not be less than 10 minutes. 11 minutes
+// is a reasonable value to use.
+const std::chrono::milliseconds connectMaxTime = 11min;
 
 
 // Pin Constants - Boron Carrier Board v1.2a
 const int tmp36Pin =      A4;                       // Simple Analog temperature sensor
 const int wakeUpPin =     D8;                       // This is the Particle Electron WKP pin
-const int donePin =       D5;                       // Pin the Electron uses to "pet" the watchdog
 const int blueLED =       D7;                       // This LED is on the Electron itself
 const int userSwitch =    D4;                       // User switch with a pull-up resistor
 
@@ -122,13 +124,12 @@ SYSTEM_MODE(SEMI_AUTOMATIC);                        // This will enable user cod
 SYSTEM_THREAD(ENABLED);                             // Means my code will not be held up by Particle processes.
 STARTUP(System.enableFeature(FEATURE_RESET_INFO));
 SystemSleepConfiguration config;                    // Initialize new Sleep 2.0 Api
-MCP79410 rtc;                                       // Rickkas MCP79410 libarary
 MB85RC64 fram(Wire, 0);                             // Rickkas' FRAM library
 retained uint8_t publishQueueRetainedBuffer[2048];
 PublishQueueAsync publishQueue(publishQueueRetainedBuffer, sizeof(publishQueueRetainedBuffer));
 DS18B20 ds18b20(tempSensors);
 AssetTracker t;
-
+AB1805 ab1805(Wire);                                // Rickkas' RTC / Watchdog library
 
 void displayInfo(); // forward declaration
 
@@ -169,6 +170,11 @@ bool systemStatusWriteNeeded = false;               // Keep track of when we nee
 bool currentCountsWriteNeeded = false;
 bool dataInFlight = false;
 
+// These variables are associated with the watchdog timer and will need to be better integrated
+int outOfMemory = -1;
+time_t RTCTime;
+void outOfMemoryHandler(system_event_t event, int param);
+
 // Sensor Variables
 const int nSENSORS = 3;
 float celsius[nSENSORS] = {NAN, NAN};
@@ -187,12 +193,8 @@ void setup()                                        // Note: Disconnected Setup(
   pinMode(wakeUpPin,INPUT);                         // This pin is active HIGH
   pinMode(userSwitch,INPUT);                        // Momentary contact button on board for direct user input
   pinMode(blueLED, OUTPUT);                         // declare the Blue LED Pin as an output
-  pinMode(donePin,OUTPUT);                          // Allows us to pet the watchdog
 
   digitalWrite(blueLED,HIGH);
-
-  petWatchdog();                                    // Pet the watchdog - This will reset the watchdog time period
-  attachInterrupt(wakeUpPin, watchdogISR, RISING);  // The watchdog timer will signal us and we have to respond
 
   char responseTopic[125];
   String deviceID = System.deviceID();              // Multiple devices share the same hook - keeps things straight
@@ -212,12 +214,15 @@ void setup()                                        // Note: Disconnected Setup(
   Particle.variable("BatteryContext",batteryContextStr);
 
   Particle.function("resetFRAM", resetFRAM);                          // These are the functions exposed to the mobile app and console
-  Particle.function("HardReset",hardResetNow);
   Particle.function("SendNow",sendNow);
   Particle.function("Verbose-Mode",setverboseMode);
   Particle.function("Set-Timezone",setTimeZone);
   Particle.function("Set-DSTOffset",setDSTOffset);
   Particle.function("SampleInterval",setSampleInterval);
+
+  Particle.setDisconnectOptions(CloudDisconnectOptions().graceful(true).timeout(5s));  // Don't disconnect abruptly
+
+  connectToParticle();
 
   // Load FRAM and reset variables to their correct values
   fram.begin();                                                       // Initialize the FRAM module
@@ -237,21 +242,39 @@ void setup()                                        // Note: Disconnected Setup(
 
   getBatteryContext();                                                // See if we have enough juice
 
+  // Enabling an out of memory handler is a good safety tip. If we run out of memory a System.reset() is done.
+  System.on(out_of_memory, outOfMemoryHandler);
+
+  // The carrier board has D8 connected to FOUT for wake interrupts
+  ab1805.withFOUT(D8).setup();
+
+  // Note whether the RTC is set 
+  sysStatus.clockSet =  ab1805.isRTCSet();
+
+  // Enable watchdog
+  ab1805.setWDT(AB1805::WATCHDOG_MAX_SECONDS);
+
+  snprintf(sampleIntervalStr, sizeof(sampleIntervalStr),"%i minutes", sysStatus.sampleIntervalMin);
+
+  Time.setDSTOffset(sysStatus.dstOffset);                              // Set the value from FRAM if in limits
+  
+  if (!Time.isValid() && sysStatus.clockSet) {                         // We need to try to get the time so we can tell if we need DST
+    ab1805.getRtcAsTime(RTCTime);
+    Time.setTime(RTCTime);
+  }
+  else {                                                               // Special case, neither the RTC or the system clock is set, we need to connect and get the time
+    connectToParticle();
+    Particle.syncTime();                                               // Set the system clock here
+  }
+
+  DSTRULES() ? Time.beginDST() : Time.endDST();    // Perform the DST calculation here
+  Time.zone(sysStatus.timezone);                                       // Set the Time Zone for our device
+  snprintf(currentOffsetStr,sizeof(currentOffsetStr),"%2.1f UTC",(Time.local() - Time.now()) / 3600.0);   // Load the offset string
+
   if (System.resetReason() == RESET_REASON_PIN_RESET || System.resetReason() == RESET_REASON_USER) { // Check to see if we are starting from a pin reset or a reset in the sketch
     sysStatus.resetCount++;
     systemStatusWriteNeeded = true;                                    // If so, store incremented number - watchdog must have done This
   }
-
-  snprintf(sampleIntervalStr, sizeof(sampleIntervalStr),"%i minutes", sysStatus.sampleIntervalMin);
-
-  rtc.setup();                                                        // Start the real time clock
-  rtc.clearAlarm();                                                   // Ensures alarm is still not set from last cycle
-
-  Time.setDSTOffset(sysStatus.dstOffset);                              // Set the value from FRAM if in limits
-  if (!Time.isValid()) Time.setTime(rtc.getRTCTime());
-  DSTRULES() ? Time.beginDST() : Time.endDST();    // Perform the DST calculation here
-  Time.zone(sysStatus.timezone);                                       // Set the Time Zone for our device
-  snprintf(currentOffsetStr,sizeof(currentOffsetStr),"%2.1f UTC",(Time.local() - Time.now()) / 3600.0);   // Load the offset string
 
   // Done with the System Stuff - now load the current counts
   fram.get(FRAM::currentCountsAddr,current);
@@ -274,9 +297,7 @@ void setup()                                        // Note: Disconnected Setup(
   startFix = millis();
   gettingFix = true;
 
-
   // Here is where the code diverges based on why we are running Setup()
-  connectToParticle();
   publishQueue.publish("State","Startup Complete",PRIVATE);
   
   if (state == INITIALIZATION_STATE) state = IDLE_STATE;              // IDLE unless otherwise from above code
@@ -289,7 +310,6 @@ void loop()
   switch(state) {
   case IDLE_STATE:                                                    // Where we spend most time - note, the order of these conditionals is important
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
-    if (watchdogFlag) petWatchdog();                                  // Watchdog flag is raised - time to pet the watchdog
     if (sysStatus.lowBatteryMode) state = SLEEPING_STATE;
     if ((Time.minute() % sysStatus.sampleIntervalMin == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;   // sub hourly interval
     else if ((Time.minute() == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;           //  on hourly interval
@@ -310,9 +330,13 @@ void loop()
     }
     if (Time.minute() > 1 && sysStatus.connectedStatus) disconnectFromParticle();          // Disconnect cleanly from Particle after the first minute
       digitalWrite(blueLED,LOW);                                        // Turn off the LED
-      petWatchdog();
+      ab1805.stopWDT();                                                 // No watchdogs interrupting our slumber
       int wakeInSeconds = constrain((60 - Time.minute()) * 60, 1, 60 * 60);   // Sleep till the top of the hour
-      rtc.setAlarm(wakeInSeconds);                                      // The Real Time Clock will turn the Enable pin back on to wake the device
+      config.mode(SystemSleepMode::ULTRA_LOW_POWER)
+        .gpio(userSwitch,CHANGE)
+        .duration(wakeInSeconds * 1000);
+      SystemSleepResult result = System.sleep(config);                   // Put the device to sleep device reboots from here   
+      ab1805.resumeWDT();                                                // Wakey Wakey - WDT can resume
     } break;
 
   case MEASURING_STATE:
@@ -360,20 +384,21 @@ void loop()
         delay(2000);
         sysStatus.resetCount = 0;                                  // Zero the ResetCount
         fram.put(FRAM::systemStatusAddr,sysStatus);
-        hardResetNow("1");
+        ab1805.deepPowerDown(10);
       }
       else {                                                          // If we have had 3 resets - time to do something more
         if (Particle.connected()) publishQueue.publish("State","Error State - Power Cycle", PRIVATE);            // Brodcase Reset Action
         delay(2000);
         sysStatus.resetCount = 0;                                     // Zero the ResetCount
         fram.put(FRAM::systemStatusAddr,sysStatus);
-        hardResetNow("1");
-        // fullModemReset();                                             // Full Modem reset and reboots
+        fullModemReset();                                             // Full Modem reset and reboots
       }
     }
     break;
   }
-  rtc.loop();                                                         // keeps the clock up to date
+
+  ab1805.loop();                                                      // Keeps the RTC synchronized with the Boron's clock
+
   if (systemStatusWriteNeeded) {
     fram.put(FRAM::systemStatusAddr,sysStatus);
     systemStatusWriteNeeded = false;
@@ -489,18 +514,6 @@ void getBatteryContext() {
 
 }
 
-void watchdogISR()
-{
-  watchdogFlag = true;
-}
-
-void petWatchdog()
-{
-  digitalWriteFast(donePin, HIGH);                                        // Pet the watchdog
-  digitalWriteFast(donePin, LOW);
-  watchdogFlag = false;
-}
-
 
 // Power Management function
 int setPowerConfig() {
@@ -520,7 +533,6 @@ void loadSystemDefaults() {                                         // Default s
   takeMeasurements();                                               // Need information to set value here - sets sysStatus.stateOfCharge
   if (Particle.connected()) publishQueue.publish("Mode","Loading System Defaults", PRIVATE);
   sysStatus.structuresVersion = 1;
-  sysStatus.metricUnits = false;
   sysStatus.verboseMode = true;
   if (sysStatus.stateOfCharge < 30) sysStatus.lowBatteryMode = true;
   else sysStatus.lowBatteryMode = false;
@@ -532,7 +544,6 @@ void loadSystemDefaults() {                                         // Default s
 
 void checkSystemValues() {                                          // Checks to ensure that all system values are in reasonable range
   takeMeasurements();                                               // Sets the sysStatus.stateOfCharge
-  if (sysStatus.metricUnits < 0 || sysStatus.metricUnits >1) sysStatus.metricUnits = 0;
   if (sysStatus.connectedStatus < 0 || sysStatus.connectedStatus > 1) {
     if (Particle.connected()) sysStatus.connectedStatus = true;
     else sysStatus.connectedStatus = false;
@@ -593,19 +604,6 @@ int resetFRAM(String command)                                     // Will reset 
   {
     fram.erase();
     return 1;
-  }
-  else return 0;
-}
-
-
-int hardResetNow(String command)                                      // Will perform a hard reset on the Electron
-{
-  if (command == "1")
-  {
-    publishQueue.publish("Reset","Hard Reset in 2 seconds",PRIVATE);
-    delay(2000);
-    rtc.setAlarm(10);
-    return 1;                                                         // Unfortunately, this will never be sent
   }
   else return 0;
 }
@@ -730,6 +728,12 @@ int setSampleInterval(String command) {                                      // 
   }
   return 1;
 }
+
+// Here are the various hardware and timer interrupt service routines
+void outOfMemoryHandler(system_event_t event, int param) {
+  outOfMemory = param;
+}
+
 
 bool isDSTusa() {
   // United States of America Summer Timer calculation (2am Local Time - 2nd Sunday in March/ 1st Sunday in November)
