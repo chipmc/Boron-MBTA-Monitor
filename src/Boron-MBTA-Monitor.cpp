@@ -29,6 +29,8 @@
 //v8.00 - updated to deviceOS@2.0.0-rc3 and fixed an ERROR_STATE issue
 //v9.00 - Update to deviceOS@2.0.0
 //v10.00 - Update to new carrier board v1.5 and deviceOS@2.0.1
+//v11.00 - Fixed formatting of GPS and slowed our roll a bit to report occaisional double reporting
+//v12.00 - Improved time keeping for battery power / vehicle power - added recovery from sleeping using user switch as long as battery is over 50%
 
 
 // Particle Product definitions
@@ -56,12 +58,14 @@ void fullModemReset();
 void dailyCleanup();
 int setDSTOffset(String command);
 int setSampleInterval(String command);
+void outOfMemoryHandler(system_event_t event, int param);
 bool isDSTusa();
-#line 29 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
+void displayInfo();
+#line 31 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
 PRODUCT_ID(11743);                                  // Boron Connected Counter Header
-PRODUCT_VERSION (10);
+PRODUCT_VERSION (12);
 #define DSTRULES isDSTusa
-char currentPointRelease[8] ="10.00";
+char currentPointRelease[8] ="12.03";
 
 namespace FRAM {                                    // Moved to namespace instead of #define to limit scope
   enum Addresses {
@@ -71,7 +75,7 @@ namespace FRAM {                                    // Moved to namespace instea
   };
 };
 
-const int FRAMversionNumber = 1;                    // Increment this number each time the memory map is changed
+const byte FRAMversionNumber = 2;                    // Increment this number each time the memory map is changed
 
 struct systemStatus_structure {                     // currently 14 bytes long
   uint8_t structuresVersion;                        // Version of the data structures (system and data)
@@ -87,6 +91,7 @@ struct systemStatus_structure {                     // currently 14 bytes long
   float timezone;                                   // Time zone value -12 to +12
   float dstOffset;                                  // How much does the DST value change?
   unsigned long lastHookResponse;                   // Last time we got a valid Webhook response
+  unsigned long lastTimePowered;                    // The last time we were on vehicle power (used to conserve battery during out of service events)
 } sysStatus;
 
 struct currentCounts_structure {                    // currently 10 bytes long
@@ -101,8 +106,13 @@ struct currentCounts_structure {                    // currently 10 bytes long
 #include "MB85RC256V-FRAM-RK.h"                     // Rickkas Particle based FRAM Library
 #include "PublishQueueAsyncRK.h"                    // Async Particle Publish
 #include "DS18B20.h"                               // Include the DS18B20 Library
-#include "AssetTrackerRK.h"                         // @Rickkas rewrite of Asset Tracker https://github.com/rickkas7/AssetTrackerRK/
 #include "AB1805_RK.h"                              // Watchdog and Real Time Clock - https://github.com/rickkas7/AB1805_RK
+#include "AssetTrackerRK.h" // only used for AssetTracker::antennaExternal
+
+// Port of TinyGPS for the Particle AssetTracker
+// https://github.com/mikalhart/TinyGPSPlus
+#include "TinyGPS++.h"
+
 
 // This is the maximum amount of time to allow for connecting to cloud. If this time is
 // exceeded, do a deep power down. This should not be less than 10 minutes. 11 minutes
@@ -128,17 +138,14 @@ MB85RC64 fram(Wire, 0);                             // Rickkas' FRAM library
 retained uint8_t publishQueueRetainedBuffer[2048];
 PublishQueueAsync publishQueue(publishQueueRetainedBuffer, sizeof(publishQueueRetainedBuffer));
 DS18B20 ds18b20(tempSensors);
-AssetTracker t;
+AssetTracker gps;
 AB1805 ab1805(Wire);                                // Rickkas' RTC / Watchdog library
-
-void displayInfo(); // forward declaration
 
 // GPS Variables
 const unsigned long PUBLISH_PERIOD = 120000;
 const unsigned long SERIAL_PERIOD = 5000;
 unsigned long startFix = 0;
 bool gettingFix = false;
-unsigned long lastSerial = 0;
 unsigned long lastPublish = 0;
 
 // State Maching Variables
@@ -156,7 +163,7 @@ unsigned long resetTimeStamp = 0;                   // Resets - this keeps you f
 char currentOffsetStr[10];                          // What is our offset from UTC
 int currentHourlyPeriod = 0;                        // Need to keep this separate from time so we know when to report
 int currentMinutePeriod = 0;                        // Makes sure we don't go into reporting too many times
-unsigned long lastTimePowered = 0;                  // Keep track of how long we are running on battery power
+
 
 // Program Variables
 volatile bool watchdogFlag;                         // Flag to let us know we need to pet the dog
@@ -166,6 +173,7 @@ char cabinTempStr[12] = "Null";                     // Temperature in the cabin
 char ventTempStr[12] = "Null";                      // Temperature of the air coming out of the AC vent
 char outsideTempStr[12] = "Null";                   // Outdoor air temperature
 char sampleIntervalStr[12] = "Null";                // Test for sample Interval
+char lastPoweredStr[32]="Null";                     // When did we last see vehicle power (starts a 4 hour clock)
 bool systemStatusWriteNeeded = false;               // Keep track of when we need to write
 bool currentCountsWriteNeeded = false;
 bool dataInFlight = false;
@@ -173,7 +181,7 @@ bool dataInFlight = false;
 // These variables are associated with the watchdog timer and will need to be better integrated
 int outOfMemory = -1;
 time_t RTCTime;
-void outOfMemoryHandler(system_event_t event, int param);
+
 
 // Sensor Variables
 const int nSENSORS = 3;
@@ -212,6 +220,7 @@ void setup()                                        // Note: Disconnected Setup(
   Particle.variable("Alerts",current.alertCount);
   Particle.variable("TimeOffset",currentOffsetStr);
   Particle.variable("BatteryContext",batteryContextStr);
+  Particle.variable("Last Powered",lastPoweredStr);
 
   Particle.function("resetFRAM", resetFRAM);                          // These are the functions exposed to the mobile app and console
   Particle.function("SendNow",sendNow);
@@ -239,8 +248,6 @@ void setup()                                        // Note: Disconnected Setup(
   else fram.get(FRAM::systemStatusAddr,sysStatus);                    // Loads the System Status array from FRAM
 
   checkSystemValues();                                                // Make sure System values are all in valid range
-
-  getBatteryContext();                                                // See if we have enough juice
 
   // Enabling an out of memory handler is a good safety tip. If we run out of memory a System.reset() is done.
   System.on(out_of_memory, outOfMemoryHandler);
@@ -276,6 +283,10 @@ void setup()                                        // Note: Disconnected Setup(
     systemStatusWriteNeeded = true;                                    // If so, store incremented number - watchdog must have done This
   }
 
+  snprintf(lastPoweredStr, sizeof(lastPoweredStr), Time.timeStr(sysStatus.lastTimePowered));   // Load the last power event
+
+  getBatteryContext();                                                // See if we have enough juice
+
   // Done with the System Stuff - now load the current counts
   fram.get(FRAM::currentCountsAddr,current);
   currentHourlyPeriod = Time.hour();                                   // The local time hourly period for reporting purposes
@@ -289,13 +300,13 @@ void setup()                                        // Note: Disconnected Setup(
     ds18b20.search(sensorAddresses[i]); // and if available store
   }
 
-  t.withI2C();
-  // Run in threaded mode - this eliminates the need to read Serial1 from loop or updateGPS() and dramatically
+	// Enable I2C mode
+	gps.withI2C();
+
+	// Run in threaded mode - this eliminates the need to read Serial1 from loop or updateGPS() and dramatically
 	// lowers the risk of lost or corrupted GPS data caused by blocking loop for too long and overflowing the
 	// 64-byte serial buffer.
-	t.startThreadedMode();
-  startFix = millis();
-  gettingFix = true;
+	gps.startThreadedMode();
 
   // Here is where the code diverges based on why we are running Setup()
   publishQueue.publish("State","Startup Complete",PRIVATE);
@@ -308,12 +319,16 @@ void setup()                                        // Note: Disconnected Setup(
 void loop()
 {
   switch(state) {
-  case IDLE_STATE:                                                    // Where we spend most time - note, the order of these conditionals is important
-    if (sysStatus.verboseMode && state != oldState) publishStateTransition();
-    if (sysStatus.lowBatteryMode) state = SLEEPING_STATE;
-    if ((Time.minute() % sysStatus.sampleIntervalMin == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;   // sub hourly interval
-    else if ((Time.minute() == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;           //  on hourly interval
-    break;
+  case IDLE_STATE: {                                                   // Where we spend most time - note, the order of these conditionals is important
+      static unsigned long lastPoll = 0;
+      if (sysStatus.verboseMode && state != oldState) publishStateTransition();
+      if (sysStatus.lowBatteryMode) state = SLEEPING_STATE;
+      if (millis() - lastPoll > 1000) {                               // Slow down the polling a bit - less traffic on i2c bus and no need to check the clock more than once a second
+        if ((Time.minute() % sysStatus.sampleIntervalMin == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;   // sub hourly interval
+        else if ((Time.minute() == 0) && (Time.minute() != currentMinutePeriod)) state = MEASURING_STATE;           //  on hourly interval
+        lastPoll = millis();
+      }
+    } break;
 
   case SLEEPING_STATE: {                                              // This state is triggered once the park closes and runs until it opens
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
@@ -337,9 +352,11 @@ void loop()
         .duration(wakeInSeconds * 1000);
       SystemSleepResult result = System.sleep(config);                   // Put the device to sleep device reboots from here   
       ab1805.resumeWDT();                                                // Wakey Wakey - WDT can resume
+      if (result.wakeupPin() == userSwitch) sysStatus.lastTimePowered = Time.now(); // Gives you a chance to bring back a device (should reset lowBatteryMode in getBatteryConext() and put system back to IDLE_STATE)
     } break;
 
   case MEASURING_STATE:
+    if (sysStatus.verboseMode && state != oldState) publishStateTransition();
     takeMeasurements();                                             // Update Temp, Battery and Signal Strength values
     state = REPORTING_STATE;
     break;
@@ -361,10 +378,10 @@ void loop()
 
   case RESP_WAIT_STATE:
     if (sysStatus.verboseMode && state != oldState) publishStateTransition();
-    if (!dataInFlight)  {                                             // Response received back to IDLE state
+    if (!dataInFlight && Time.minute() != currentMinutePeriod)  {     // Response received back to IDLE state and wait till the minute has passed to prevent double reporting
       state = IDLE_STATE;
     }
-    else if (millis() - webhookTimeStamp > webhookWait) {             // If it takes too long - will need to reset
+    else if (dataInFlight && millis() - webhookTimeStamp > webhookWait) {             // If it takes too long - will need to reset
       resetTimeStamp = millis();
       publishQueue.publish("spark/device/session/end", "", PRIVATE);      // If the device times out on the Webhook response, it will ensure a new session is started on next connect
       state = ERROR_STATE;                                            // Response timed out
@@ -406,6 +423,16 @@ void loop()
   if (currentCountsWriteNeeded) {
     fram.put(FRAM::currentCountsAddr,current);
     currentCountsWriteNeeded = false;
+  }
+  if (outOfMemory >= 0) {
+    char message[64];
+    // An out of memory condition occurred - reset device.
+    snprintf(message, sizeof(message), "Out of memory occurred size=%d",outOfMemory);
+    Log.info(message);
+    delay(100);
+    publishQueue.publish("Memory",message,PRIVATE);
+    delay(2000);
+    System.reset();
   }
 }
 
@@ -489,7 +516,6 @@ void getSignalStrength() {
 }
 
 void getBatteryContext() {
-
   static bool alreadyOnBattery = false;                                           // Wee need to watch how long we are on battery power
 
   sysStatus.stateOfCharge = int(System.batteryCharge());                          // Percentage of full charge
@@ -504,10 +530,11 @@ void getBatteryContext() {
   }
   else if (System.batteryState() == 2 || System.batteryState() == 3) {            // If charged or charging
     alreadyOnBattery = false;
-    lastTimePowered = millis();
+    sysStatus.lastTimePowered = Time.now();
+    snprintf(lastPoweredStr, sizeof(lastPoweredStr), Time.timeStr());
   }
 
-  if (millis() - lastTimePowered > 14400000 || sysStatus.stateOfCharge <= 50) {    // If we have been on battery for four hours, or the battery is less than 50%
+  if (Time.now() - sysStatus.lastTimePowered > 4 * 60 * 60 || sysStatus.stateOfCharge <= 50) {    // If we have been on battery for four hours, or the battery is less than 50%
     sysStatus.lowBatteryMode = true;
   } 
   else sysStatus.lowBatteryMode = false;
@@ -539,6 +566,8 @@ void loadSystemDefaults() {                                         // Default s
   sysStatus.sampleIntervalMin = 10;                                 // Default reading every 10 minutes
   sysStatus.timezone = -5;                                          // Default is East Coast Time
   sysStatus.dstOffset = 1;
+  sysStatus.lastHookResponse = 0;
+  sysStatus.lastTimePowered = Time.now();                           // Make sure we do not go to sleep right away
   fram.put(FRAM::systemStatusAddr,sysStatus);                       // Write it now since this is a big deal and I don't want values over written
 }
 
@@ -555,6 +584,7 @@ void checkSystemValues() {                                          // Checks to
   if (sysStatus.resetCount < 0 || sysStatus.resetCount > 255) sysStatus.resetCount = 0;
   if (sysStatus.timezone < -12 || sysStatus.timezone > 12) sysStatus.timezone = -5;
   if (sysStatus.dstOffset < 0 || sysStatus.dstOffset > 2) sysStatus.dstOffset = 1;
+  if (Time.now() < sysStatus.lastTimePowered) sysStatus.lastTimePowered = 0;          // Can't go back in time
   sysStatus.sampleIntervalMin = 10;                                 // Default reading every 10 minutes
   // None for lastHookResponse
 
@@ -772,34 +802,23 @@ bool isDSTusa() {
 
 void displayInfo()
 {
-	if (millis() - lastSerial >= SERIAL_PERIOD) {
+  static unsigned long lastSerial = 0;
+
+	if (millis() - lastSerial >= 1000) {                                      // Don't read more than once a second
 		lastSerial = millis();
 
 		char buf[128];
-		if (t.gpsFix()) {
-      current.latitude = t.readLatDeg();
-      current.longitude = t.readLonDeg();
-			snprintf(buf, sizeof(buf), "location:%f,%f altitude:%f satellites:%d hdop:%l", t.readLatDeg(), t.readLonDeg(), t.getAltitude(), t.getSatellites(), t.getTinyGPSPlus()->getHDOP().value());
-			if (gettingFix) {
-				gettingFix = false;
-				unsigned long elapsed = millis() - startFix;
-				Log.info("%lu milliseconds to get GPS fix", elapsed);
-			}
+
+		if (gps.gpsFix()) {
+      current.latitude = gps.readLatDeg();
+      current.longitude = gps.readLonDeg();
+			snprintf(buf, sizeof(buf), "location: %f, %f altitude: %4.1fm %d sattelites", current.latitude, current.longitude, gps.getAltitude(), gps.getSatellites());
 		}
 		else {
-			snprintf(buf, sizeof(buf), "no location satellites:%d", t.getSatellites());
-			if (!gettingFix) {
-				gettingFix = true;
-				startFix = millis();
-			}
+			snprintf(buf, sizeof(buf), "no location satellites:%d", gps.getSatellites());
 		}
-		Log.info(buf);
 
-		if (Particle.connected()) {
-			if (millis() - lastPublish >= PUBLISH_PERIOD) {
-				lastPublish = millis();
-				Particle.publish("gps", buf, PRIVATE);
-			}
-		}
+		Log.info(buf);
+		if (Particle.connected()) publishQueue.publish("gps", buf, PRIVATE);
 	}
 }
