@@ -30,7 +30,7 @@
 //v9.00 - Update to deviceOS@2.0.0
 //v10.00 - Update to new carrier board v1.5 and deviceOS@2.0.1
 //v11.00 - Fixed formatting of GPS and slowed our roll a bit to report occaisional double reporting
-//v12.00 - Improved time keeping for battery power / vehicle power - added recovery from sleeping using user switch as long as battery is over 50%
+//v12.00 - Improved time keeping for battery power / vehicle power - added recovery from sleeping using user switch as long as battery is over 50% - added out of memory reset
 
 
 // Particle Product definitions
@@ -39,6 +39,7 @@ void loop();
 void sendEvent();
 void UbidotsHandler(const char *event, const char *data);
 void takeMeasurements();
+void displayInfo();
 double getTemp(uint8_t addr[8]);
 void getSignalStrength();
 void getBatteryContext();
@@ -60,7 +61,6 @@ int setDSTOffset(String command);
 int setSampleInterval(String command);
 void outOfMemoryHandler(system_event_t event, int param);
 bool isDSTusa();
-void displayInfo();
 #line 31 "/Users/chipmc/Documents/Maker/Particle/Projects/Boron-MBTA-Monitor/src/Boron-MBTA-Monitor.ino"
 PRODUCT_ID(11743);                                  // Boron Connected Counter Header
 PRODUCT_VERSION (12);
@@ -462,7 +462,7 @@ void UbidotsHandler(const char *event, const char *data) {            // Looks a
   else {
     snprintf(responseString, sizeof(responseString), "Unknown response recevied %i",atoi(data));
   }
-  publishQueue.publish("Ubidots Hook", responseString, PRIVATE);
+  if (sysStatus.verboseMode) publishQueue.publish("Ubidots Hook", responseString, PRIVATE);
 }
 
 // These are the functions that are part of the takeMeasurements call
@@ -481,6 +481,29 @@ void takeMeasurements()
   getBatteryContext();                                               // What is the battery up to?
   systemStatusWriteNeeded=true;
   currentCountsWriteNeeded=true;
+}
+
+void displayInfo()
+{
+  static unsigned long lastSerial = 0;
+
+	if (millis() - lastSerial >= 1000) {                                      // Don't read more than once a second
+		lastSerial = millis();
+
+		char buf[128];
+
+		if (gps.gpsFix()) {
+      current.latitude = gps.readLatDeg();
+      current.longitude = gps.readLonDeg();
+			snprintf(buf, sizeof(buf), "location: %f, %f altitude: %4.1fm %d sattelites", current.latitude, current.longitude, gps.getAltitude(), gps.getSatellites());
+		}
+		else {
+			snprintf(buf, sizeof(buf), "no location satellites:%d", gps.getSatellites());
+		}
+
+		Log.info(buf);
+		if (sysStatus.verboseMode) publishQueue.publish("gps", buf, PRIVATE);
+	}
 }
 
 double getTemp(uint8_t addr[8]) {
@@ -798,27 +821,4 @@ bool isDSTusa() {
     return !dayStartedAs;
   }
   return dayStartedAs;
-}
-
-void displayInfo()
-{
-  static unsigned long lastSerial = 0;
-
-	if (millis() - lastSerial >= 1000) {                                      // Don't read more than once a second
-		lastSerial = millis();
-
-		char buf[128];
-
-		if (gps.gpsFix()) {
-      current.latitude = gps.readLatDeg();
-      current.longitude = gps.readLonDeg();
-			snprintf(buf, sizeof(buf), "location: %f, %f altitude: %4.1fm %d sattelites", current.latitude, current.longitude, gps.getAltitude(), gps.getSatellites());
-		}
-		else {
-			snprintf(buf, sizeof(buf), "no location satellites:%d", gps.getSatellites());
-		}
-
-		Log.info(buf);
-		if (Particle.connected()) publishQueue.publish("gps", buf, PRIVATE);
-	}
 }
